@@ -54,7 +54,7 @@ class KeyGenerateCommand extends Command
         // Next, we will replace the application key in the environment file so it is
         // automatically setup for this developer. This key gets generated using a
         // secure random byte generator and is later base64 encoded for storage.
-        if (! $this->setKeyInEnvironmentFile($key)) {
+        if (!$this->setKeyInEnvironmentFile($key)) {
             return;
         }
 
@@ -76,6 +76,7 @@ class KeyGenerateCommand extends Command
      * Generate a random key for the application.
      *
      * @param $cipher
+     *
      * @return string
      */
     protected function generateRandomKey($cipher)
@@ -88,14 +89,15 @@ class KeyGenerateCommand extends Command
     /**
      * Set the application key in the environment file.
      *
-     * @param  string  $key
+     * @param string $key
+     *
      * @return bool
      */
     protected function setKeyInEnvironmentFile($key)
     {
         $currentKey = $this->laravel['config']["cryptographer.drivers.{$this->driver}.key"];
 
-        if (strlen($currentKey) !== 0 && (! $this->confirmToProceed())) {
+        if (strlen($currentKey) !== 0 && (!$this->confirmToProceed())) {
             return false;
         }
 
@@ -107,7 +109,8 @@ class KeyGenerateCommand extends Command
     /**
      * Write a new environment file with the given key.
      *
-     * @param  string  $key
+     * @param string $key
+     *
      * @return void
      */
     protected function writeNewEnvironmentFileWith($key)

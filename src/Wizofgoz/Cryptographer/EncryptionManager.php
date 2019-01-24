@@ -3,10 +3,10 @@
 namespace Wizofgoz\Cryptographer;
 
 use Closure;
-use RuntimeException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\Schema;
 
 class EncryptionManager
@@ -40,7 +40,8 @@ class EncryptionManager
     /**
      * Create a new manager instance.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param \Illuminate\Foundation\Application $app
+     *
      * @return void
      */
     public function __construct($app)
@@ -51,10 +52,11 @@ class EncryptionManager
     /**
      * Get a driver instance.
      *
-     * @param  string  $driver
-     * @return mixed
+     * @param string $driver
      *
      * @throws \InvalidArgumentException
+     *
+     * @return mixed
      */
     public function driver($driver = null)
     {
@@ -70,7 +72,7 @@ class EncryptionManager
         // If the given driver has not been created before, we will create the instances
         // here and cache it so we can return it next time very quickly. If there is
         // already a driver created by this name, we'll just return that instance.
-        if (! isset($this->drivers[$driver])) {
+        if (!isset($this->drivers[$driver])) {
             $this->drivers[$driver] = $this->createDriver($config);
         }
 
@@ -80,10 +82,11 @@ class EncryptionManager
     /**
      * Get the configuration for a driver.
      *
-     * @param  string  $name
-     * @return array
+     * @param string $name
      *
      * @throws \InvalidArgumentException
+     *
+     * @return array
      */
     protected function configuration($name)
     {
@@ -119,10 +122,11 @@ class EncryptionManager
     /**
      * Create a new driver instance.
      *
-     * @param  array  $config
-     * @return mixed
+     * @param array $config
      *
      * @throws \InvalidArgumentException
+     *
+     * @return mixed
      */
     protected function createDriver($config)
     {
@@ -147,8 +151,9 @@ class EncryptionManager
     /**
      * Call a custom driver creator.
      *
-     * @param  string $schema
-     * @param  array  $config
+     * @param string $schema
+     * @param array  $config
+     *
      * @return mixed
      */
     protected function callCustomCreator($schema, $config)
@@ -159,7 +164,8 @@ class EncryptionManager
     /**
      * Create an instance of the OpenSSL encryption Schema.
      *
-     * @param  array  $config
+     * @param array $config
+     *
      * @return \Wizofgoz\Cryptographer\OpenSslEncrypter
      */
     public function createOpenSslSchema(array $config)
@@ -181,20 +187,21 @@ class EncryptionManager
     /**
      * Create a new encryption key for the cipher.
      *
-     * @param  string       $schema
-     * @param  string|null  $cipher
+     * @param string      $schema
+     * @param string|null $cipher
+     *
      * @return string
      */
     public static function generateKey($schema, $cipher = null)
     {
-        if (! isset(static::$keyGenerators[$schema])) {
+        if (!isset(static::$keyGenerators[$schema])) {
             throw new InvalidArgumentException("Key generator not found for [{$schema}] schema.");
         }
 
         /** @var Schema $keyGenerator */
         $keyGenerator = (static::$keyGenerators[$schema])();
 
-        if (! class_exists($keyGenerator)) {
+        if (!class_exists($keyGenerator)) {
             throw new RuntimeException("Key generator class [{$keyGenerator}] not found for [{$schema}] schema.");
         }
 
@@ -204,11 +211,12 @@ class EncryptionManager
     /**
      * Encrypt the given value.
      *
-     * @param  mixed  $value
-     * @param  bool  $serialize
-     * @return string
+     * @param mixed $value
+     * @param bool  $serialize
      *
      * @throws \Illuminate\Contracts\Encryption\EncryptException
+     *
+     * @return string
      */
     public function encrypt($value, $serialize = true)
     {
@@ -218,10 +226,11 @@ class EncryptionManager
     /**
      * Encrypt a string without serialization.
      *
-     * @param  string  $value
-     * @return string
+     * @param string $value
      *
      * @throws \Illuminate\Contracts\Encryption\EncryptException
+     *
+     * @return string
      */
     public function encryptString($value)
     {
@@ -231,11 +240,12 @@ class EncryptionManager
     /**
      * Decrypt the given value.
      *
-     * @param  mixed  $payload
-     * @param  bool  $unserialize
-     * @return mixed
+     * @param mixed $payload
+     * @param bool  $unserialize
      *
      * @throws \Illuminate\Contracts\Encryption\DecryptException
+     *
+     * @return mixed
      */
     public function decrypt($payload, $unserialize = true)
     {
@@ -245,10 +255,11 @@ class EncryptionManager
     /**
      * Decrypt the given string without unserialization.
      *
-     * @param  string  $payload
-     * @return string
+     * @param string $payload
      *
      * @throws \Illuminate\Contracts\Encryption\DecryptException
+     *
+     * @return string
      */
     public function decryptString($payload)
     {
@@ -258,8 +269,9 @@ class EncryptionManager
     /**
      * Register a custom schema creator Closure.
      *
-     * @param  string    $schema
-     * @param  \Closure  $callback
+     * @param string   $schema
+     * @param \Closure $callback
+     *
      * @return $this
      */
     public function extend($schema, Closure $callback)
@@ -303,8 +315,9 @@ class EncryptionManager
     /**
      * Dynamically call the default driver instance.
      *
-     * @param  string  $method
-     * @param  array   $parameters
+     * @param string $method
+     * @param array  $parameters
+     *
      * @return mixed
      */
     public function __call($method, $parameters)
