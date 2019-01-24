@@ -2,11 +2,11 @@
 
 namespace Wizofgoz\Cryptographer\Tests\Integration;
 
-use RuntimeException;
 use Orchestra\Testbench\TestCase;
-use Wizofgoz\Cryptographer\OpenSslEncrypter;
+use RuntimeException;
 use Wizofgoz\Cryptographer\EncryptionManager;
 use Wizofgoz\Cryptographer\EncryptionServiceProvider;
+use Wizofgoz\Cryptographer\OpenSslEncrypter;
 
 class EncryptionTest extends TestCase
 {
@@ -20,7 +20,7 @@ class EncryptionTest extends TestCase
                     'cipher' => OpenSslEncrypter::AES_256,
                     'key'    => 'base64:IUHRqAQ99pZ0A1MPjbuv1D6ff3jxv0GIvS2qIW4JNU4=',
                 ],
-            ]
+            ],
         ]);
     }
 
