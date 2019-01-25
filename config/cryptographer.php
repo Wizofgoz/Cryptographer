@@ -31,7 +31,7 @@ return [
         'default' => [
             'schema' => 'openssl',
             'cipher' => \Wizofgoz\Cryptographer\OpenSslEncrypter::AES_128,
-            'key'    => env('DEFAULT_ENCRYPTION_KEY'),
+            'key'    => env('APP_KEY'),
         ],
 
     ],
