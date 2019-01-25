@@ -40,6 +40,8 @@ This option allows for defining the encryption drivers available to your applica
 ],
 ```
 
+The only schema available at the moment is `openssl` but it is a drop-in replacement for the stock Laravel encrypter. Additional schemas can be added via 3rd party packages.
+
 ## Usage
 This package effectively replaces Laravel's encryption system so the built-in `encrypt()` helper or the `Crypt` facade may be used when you want to utilize your default driver.
 
