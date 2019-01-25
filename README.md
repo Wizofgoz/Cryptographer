@@ -1,5 +1,5 @@
 # Cryptographer
-<p align="center">
+<p>
 <a href="https://travis-ci.org/Wizofgoz/Cryptographer"><img src="https://travis-ci.org/Wizofgoz/Cryptographer.svg?branch=master" alt="Build Status"></a>
 <a href="https://github.styleci.io/repos/167452628"><img src="https://github.styleci.io/repos/167452628/shield?branch=master" alt="Style Status"></a>
 <a href="https://packagist.org/packages/wizofgoz/cryptographer"><img src="https://poser.pugx.org/wizofgoz/cryptographer/downloads" alt="Total Downloads"></a>
@@ -17,10 +17,10 @@ You may use Composer to install Cryptographer into your Laravel project:
 
 After installing, publish the configuration:
 
-`php artisan vendor:publish --provider=Wizofgoz\Cryptographer\EncryptionServiceProvider`
+`php artisan vendor:publish --provider="Wizofgoz\Cryptographer\EncryptionServiceProvider"`
 
 ## Configuration
-After publishing the configuration file, it will be located at `config/cryptographer.php` This file allows you to define the encryption drivers.
+After publishing the configuration file, it will be located at `config/cryptographer.php` This file allows you to define the encryption drivers available to your application.
 
 ### Default Driver
 This option allows you to define the default driver to use when using the encryption service. If no default driver is set, the first entry in the drivers array will be used.
