@@ -16,10 +16,10 @@ class KeyGenerateCommand extends Command
      * @var string
      */
     protected $signature = 'crypt:key:generate
-                    {--driver: Manually enter a driver to generate a key for}
-                    {--schema: Manually enter a schema to generate a key for}
-                    {--cipher: Manually enter a cipher to generate a key for}
-                    {--env: Save the new key to env file under a custom name}
+                    {--D|driver= : Manually enter a driver to generate a key for}
+                    {--S|schema= : Manually enter a schema to generate a key for}
+                    {--C|cipher= : Manually enter a cipher to generate a key for}
+                    {--E|environment= : Save the new key to env file under a custom name}
                     {--show : Display the key instead of modifying files}
                     {--force : Force the operation to run when in production}';
 
@@ -42,10 +42,11 @@ class KeyGenerateCommand extends Command
     public function handle()
     {
         $this->driver = $this->option('driver') ?? $this->getDefaultDriver();
-        $this->env = $this->option('env') ?? 'APP_KEY';
+        $this->env = $this->option('environment') ?? 'APP_KEY';
 
+        $schema = $this->option('schema') ?? $this->laravel['config']["cryptographer.drivers.{$this->driver}.schema"];
         $cipher = $this->option('cipher') ?? $this->laravel['config']["cryptographer.drivers.{$this->driver}.cipher"];
-        $key = $this->generateRandomKey($cipher);
+        $key = $this->generateRandomKey($schema, $cipher);
 
         if ($this->option('show')) {
             return $this->line('<comment>'.$key.'</comment>');
@@ -75,14 +76,15 @@ class KeyGenerateCommand extends Command
     /**
      * Generate a random key for the application.
      *
-     * @param $cipher
+     * @param string $schema
+     * @param string $cipher
      *
      * @return string
      */
-    protected function generateRandomKey($cipher)
+    protected function generateRandomKey($schema, $cipher)
     {
         return 'base64:'.base64_encode(
-            EncryptionManager::generateKey($this->laravel['config']["cryptographer.drivers.{$this->driver}.schema"], $cipher)
+            EncryptionManager::generateKey($schema, $cipher)
         );
     }
 
@@ -115,11 +117,19 @@ class KeyGenerateCommand extends Command
      */
     protected function writeNewEnvironmentFileWith($key)
     {
-        file_put_contents($this->laravel->environmentFilePath(), preg_replace(
-            $this->keyReplacementPattern(),
-            "{$this->env}={$key}",
-            file_get_contents($this->laravel->environmentFilePath())
-        ));
+        $env = file_get_contents($this->laravel->environmentFilePath());
+
+        if (strpos($env, $this->env) !== false) {
+            $env = preg_replace(
+                $this->keyReplacementPattern(),
+                "{$this->env}={$key}",
+                $env
+            );
+        } else {
+            $env = "{$env}\n{$this->env}={$key}";
+        }
+
+        file_put_contents($this->laravel->environmentFilePath(), $env);
     }
 
     /**
@@ -130,7 +140,7 @@ class KeyGenerateCommand extends Command
     protected function keyReplacementPattern()
     {
         $escaped = preg_quote('='.$this->laravel['config']["cryptographer.drivers.{$this->driver}.key"], '/');
-
+        $this->line("/^{$this->env}{$escaped}/m");
         return "/^{$this->env}{$escaped}/m";
     }
 }
