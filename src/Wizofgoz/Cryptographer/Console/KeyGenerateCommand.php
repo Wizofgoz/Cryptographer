@@ -141,6 +141,7 @@ class KeyGenerateCommand extends Command
     {
         $escaped = preg_quote('='.$this->laravel['config']["cryptographer.drivers.{$this->driver}.key"], '/');
         $this->line("/^{$this->env}{$escaped}/m");
+
         return "/^{$this->env}{$escaped}/m";
     }
 }
