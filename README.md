@@ -57,7 +57,7 @@ Encryption keys can be generated using the command `php artisan crypt:key:genera
 - `--driver` the name of the driver from your configuration to use.
 - `--schema` an override of the schema to use when generating a key.
 - `--cipher` an override of the cipher to use when generating a key.
-- `--env` what environment variable to set in your .env file. Defaults to `APP_KEY`.
+- `--environment` what environment variable to set in your .env file. Defaults to `APP_KEY`.
 - `--show` to display the key instead of applying it to configuration and environment.
 - `--force` force the operation to run when in production.
 
