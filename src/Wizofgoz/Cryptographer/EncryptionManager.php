@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\Schema;
+use Wizofgoz\Cryptographer\Schema\OpenSslSchema;
+use Wizofgoz\Cryptographer\Schema\SodiumSchema;
 
 class EncryptionManager
 {
@@ -166,11 +168,27 @@ class EncryptionManager
      *
      * @param array $config
      *
-     * @return \Wizofgoz\Cryptographer\OpenSslEncrypter
+     * @return \Wizofgoz\Cryptographer\Schema\OpenSslSchema
      */
     public function createOpenSslSchema(array $config)
     {
-        return new OpenSslEncrypter($config['key'], $config['cipher']);
+        return new OpenSslSchema($config['key'], $config['cipher']);
+    }
+
+    /**
+     * Create an instance of the Sodium encryption Schema.
+     *
+     * @param array $config
+     *
+     * @return \Wizofgoz\Cryptographer\Schema\SodiumSchema
+     */
+    public function createSodiumSchema(array $config)
+    {
+        if (!extension_loaded('sodium')) {
+            throw new RuntimeException('Sodium PHP extension is required to use the sodium schema.');
+        }
+
+        return new SodiumSchema($config['key'], $config['cipher']);
     }
 
     /**

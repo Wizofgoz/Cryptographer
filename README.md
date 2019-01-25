@@ -34,16 +34,32 @@ This option allows for defining the encryption drivers available to your applica
 'drivers' => [
     'default' => [
         'schema' => 'openssl',
-        'cipher' => OpenSslEncrypter::AES_128,
+        'cipher' => OpenSslSchema::CIPHER_AES_128,
         'key'    => env('APP_KEY'),
     ],
 ],
 ```
+## Available Schemas
+### OpenSSL
+The `openssl` schema is drop-in replacement for Laravel's encryption system that will work with existing keys assuming the cipher is set correctly.
 
-The only schema available at the moment is `openssl` but it is a drop-in replacement for the stock Laravel encrypter. Additional schemas can be added via 3rd party packages.
+#### Supported Ciphers
+
+- `OpenSslSchema::CIPHER_AES_128`: AES-128-CBC - default
+- `OpenSslSchema::CIPHER_AES_256`: AES-256-CBC
+
+### Sodium
+The `sodium` schema depends on the [Sodium](http://php.net/manual/en/book.sodium.php) PHP extension and will not be available if it is missing. In PHP 7.2+, the Sodium extension is part of the core and should always be available.
+
+#### Supported Ciphers
+
+- `SodiumSchema::CIPHER_AES_256`: AES-256-GCM - requires hardware support
+- `SodiumSchema::CIPHER_CHACHA`: CHACHA-20-POLY-1305
+- `SodiumSchema::CIPHER_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF
+- `SodiumSchema::CIPHER_X_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF - default
 
 ## Usage
-This package effectively replaces Laravel's encryption system so the built-in `encrypt()` helper or the `Crypt` facade may be used when you want to utilize your default driver.
+This package integrates with Laravel's encryption system and either the built-in `encrypt()` and `decrypt()` helpers or the `Crypt` facade may be used when you want to utilize your default driver.
 
 In order to use additional drivers, the `Crypt` facade must be used:
 
@@ -69,13 +85,13 @@ Custom schemas can be added by simply extending `EncryptionManager` and register
 ```php
 public function register()
 {
-    EncryptionManager::registerKeyGenerator('special', function () {
-        return SpecialEncrypter::class;
+    EncryptionManager::registerKeyGenerator('schema_name', function () {
+        return SpecialSchema::class;
     });
 
     $this->app->resolving('encrypter', function ($encrypter) {
-        $encrypter->extend('special', function ($config) {
-            return new SpecialEncrypter($config);
+        $encrypter->extend('schema_name', function ($config) {
+            return new SpecialSchema($config);
         });
     });
 }

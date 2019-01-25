@@ -1,21 +1,21 @@
 <?php
 
-namespace Wizofgoz\Cryptographer;
+namespace Wizofgoz\Cryptographer\Schema;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\EncryptException;
 use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\Schema;
 
-class OpenSslEncrypter implements Schema
+class OpenSslSchema implements Schema
 {
-    const AES_128 = 'AES-128-CBC';
+    const CIPHER_AES_128 = 'AES-128-CBC';
 
-    const AES_256 = 'AES-256-CBC';
+    const CIPHER_AES_256 = 'AES-256-CBC';
 
     const KEY_LENGTHS = [
-        self::AES_128 => 16,
-        self::AES_256 => 32,
+        self::CIPHER_AES_128 => 16,
+        self::CIPHER_AES_256 => 32,
     ];
 
     /**
@@ -40,7 +40,7 @@ class OpenSslEncrypter implements Schema
      *
      * @return void
      */
-    public function __construct($key, $cipher = self::AES_128)
+    public function __construct($key, $cipher = self::CIPHER_AES_128)
     {
         $key = (string) $key;
 
@@ -77,7 +77,7 @@ class OpenSslEncrypter implements Schema
      *
      * @return string
      */
-    public static function generateKey($cipher = self::AES_128)
+    public static function generateKey($cipher = self::CIPHER_AES_128)
     {
         if (!isset(static::KEY_LENGTHS[$cipher])) {
             throw new \InvalidArgumentException("{$cipher} is not a supported cipher.");
