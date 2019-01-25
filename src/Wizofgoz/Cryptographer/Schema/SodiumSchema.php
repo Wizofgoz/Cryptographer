@@ -2,9 +2,9 @@
 
 namespace Wizofgoz\Cryptographer\Schema;
 
-use RuntimeException;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\EncryptException;
+use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\Schema;
 
 class SodiumSchema implements Schema
@@ -38,11 +38,12 @@ class SodiumSchema implements Schema
     /**
      * Create a new encrypter instance.
      *
-     * @param  string  $key
-     * @param  string  $cipher
-     * @return void
+     * @param string $key
+     * @param string $cipher
      *
      * @throws \RuntimeException
+     *
+     * @return void
      */
     public function __construct($key, $cipher = self::CIPHER_X_CHACHA_IETF)
     {
@@ -61,8 +62,9 @@ class SodiumSchema implements Schema
     /**
      * Determine if the given key and cipher combination is valid.
      *
-     * @param  string  $key
-     * @param  string  $cipher
+     * @param string $key
+     * @param string $cipher
+     *
      * @return bool
      */
     public static function supported($key, $cipher)
@@ -84,6 +86,7 @@ class SodiumSchema implements Schema
      * Get appropriate key length for the current cipher.
      *
      * @param $cipher
+     *
      * @return int
      */
     protected static function getKeyLength($cipher = self::CIPHER_X_CHACHA_IETF)
@@ -107,10 +110,11 @@ class SodiumSchema implements Schema
     /**
      * Create a new encryption key for the given cipher.
      *
-     * @param  string  $cipher
-     * @return string
+     * @param string $cipher
      *
      * @throws \Exception
+     *
+     * @return string
      */
     public static function generateKey($cipher = self::CIPHER_X_CHACHA_IETF)
     {
@@ -120,12 +124,13 @@ class SodiumSchema implements Schema
     /**
      * Encrypt the given value.
      *
-     * @param  mixed  $value
-     * @param  bool  $serialize
-     * @return string
+     * @param mixed $value
+     * @param bool  $serialize
      *
      * @throws \Exception
      * @throws \Illuminate\Contracts\Encryption\EncryptException
+     *
+     * @return string
      */
     public function encrypt($value, $serialize = true)
     {
@@ -185,9 +190,9 @@ class SodiumSchema implements Schema
     /**
      * Generate an appropriate nonce for the current cipher.
      *
-     * @return string
-     *
      * @throws \Exception
+     *
+     * @return string
      */
     protected function generateNonce()
     {
@@ -198,9 +203,10 @@ class SodiumSchema implements Schema
      * Run encryption on the given value.
      *
      * @param $value
-     * @return bool|string
      *
      * @throws \Exception
+     *
+     * @return bool|string
      */
     protected function doEncrypt($value)
     {
@@ -227,11 +233,12 @@ class SodiumSchema implements Schema
     /**
      * Decrypt the given value.
      *
-     * @param  mixed  $payload
-     * @param  bool  $unserialize
-     * @return mixed
+     * @param mixed $payload
+     * @param bool  $unserialize
      *
      * @throws \Illuminate\Contracts\Encryption\DecryptException
+     *
+     * @return mixed
      */
     public function decrypt($payload, $unserialize = true)
     {
@@ -264,6 +271,7 @@ class SodiumSchema implements Schema
      * Run decryption on the given payload.
      *
      * @param $payload
+     *
      * @return bool|string
      */
     protected function doDecrypt($payload)
@@ -293,6 +301,7 @@ class SodiumSchema implements Schema
      * Extract the nonce from an encrypted payload.
      *
      * @param $payload
+     *
      * @return string
      */
     protected function extractNonce($payload)
@@ -304,6 +313,7 @@ class SodiumSchema implements Schema
      * Extract the cipher text from an encrypted payload.
      *
      * @param $payload
+     *
      * @return string
      */
     protected function extractCipherText($payload)

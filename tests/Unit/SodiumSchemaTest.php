@@ -7,7 +7,6 @@ use Wizofgoz\Cryptographer\Schema\SodiumSchema;
 
 class SodiumSchemaTest extends TestCase
 {
-
     protected function setUp()
     {
         parent::setUp();
