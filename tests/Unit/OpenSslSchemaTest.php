@@ -3,13 +3,13 @@
 namespace Wizofgoz\Cryptographer\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Wizofgoz\Cryptographer\OpenSslEncrypter;
+use Wizofgoz\Cryptographer\Schema\OpenSslSchema;
 
-class OpenSslEncrypterTest extends TestCase
+class OpenSslSchemaTest extends TestCase
 {
     public function testEncryption()
     {
-        $e = new OpenSslEncrypter(str_repeat('a', 16));
+        $e = new OpenSslSchema(str_repeat('a', 16));
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -18,31 +18,22 @@ class OpenSslEncrypterTest extends TestCase
 
     public function testRawStringEncryption()
     {
-        $e = new OpenSslEncrypter(str_repeat('a', 16));
+        $e = new OpenSslSchema(str_repeat('a', 16));
         $encrypted = $e->encryptString('foo');
 
         $this->assertNotEquals('foo', $encrypted);
         $this->assertEquals('foo', $e->decryptString($encrypted));
     }
 
-    public function testEncryptionUsingBase64EncodedKey()
-    {
-        $e = new OpenSslEncrypter(random_bytes(16));
-        $encrypted = $e->encrypt('foo');
-
-        $this->assertNotEquals('foo', $encrypted);
-        $this->assertEquals('foo', $e->decrypt($encrypted));
-    }
-
     public function testWithCustomCipher()
     {
-        $e = new OpenSslEncrypter(str_repeat('b', 32), OpenSslEncrypter::AES_256);
+        $e = new OpenSslSchema(str_repeat('b', 32), OpenSslSchema::CIPHER_AES_256);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new OpenSslEncrypter(random_bytes(32), OpenSslEncrypter::AES_256);
+        $e = new OpenSslSchema(random_bytes(32), OpenSslSchema::CIPHER_AES_256);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -51,7 +42,7 @@ class OpenSslEncrypterTest extends TestCase
 
     public function testGenerateKey()
     {
-        $f = new OpenSslEncrypter(OpenSslEncrypter::generateKey());
+        $f = new OpenSslSchema(OpenSslSchema::generateKey());
 
         $plaintext = 'bar';
         $ciphertext = $f->encrypt($plaintext);
@@ -61,7 +52,7 @@ class OpenSslEncrypterTest extends TestCase
 
     public function testGenerateKeyWithCustomCipher()
     {
-        $f = new OpenSslEncrypter(OpenSslEncrypter::generateKey(OpenSslEncrypter::AES_256), OpenSslEncrypter::AES_256);
+        $f = new OpenSslSchema(OpenSslSchema::generateKey(OpenSslSchema::CIPHER_AES_256), OpenSslSchema::CIPHER_AES_256);
 
         $plaintext = 'bar';
         $ciphertext = $f->encrypt($plaintext);
@@ -75,7 +66,7 @@ class OpenSslEncrypterTest extends TestCase
      */
     public function testExceptionThrownWhenPayloadIsInvalid()
     {
-        $e = new OpenSslEncrypter(str_repeat('a', 16));
+        $e = new OpenSslSchema(str_repeat('a', 16));
 
         $payload = $e->encrypt('foo');
 
@@ -90,8 +81,8 @@ class OpenSslEncrypterTest extends TestCase
      */
     public function testExceptionThrownWithDifferentKey()
     {
-        $a = new OpenSslEncrypter(str_repeat('a', 16));
-        $b = new OpenSslEncrypter(str_repeat('b', 16));
+        $a = new OpenSslSchema(str_repeat('a', 16));
+        $b = new OpenSslSchema(str_repeat('b', 16));
 
         $b->decrypt($a->encrypt('baz'));
     }
@@ -102,7 +93,7 @@ class OpenSslEncrypterTest extends TestCase
      */
     public function testExceptionThrownWhenIvIsTooLong()
     {
-        $e = new OpenSslEncrypter(str_repeat('a', 16));
+        $e = new OpenSslSchema(str_repeat('a', 16));
 
         $payload = $e->encrypt('foo');
 

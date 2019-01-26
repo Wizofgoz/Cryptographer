@@ -6,7 +6,7 @@ use Orchestra\Testbench\TestCase;
 use RuntimeException;
 use Wizofgoz\Cryptographer\EncryptionManager;
 use Wizofgoz\Cryptographer\EncryptionServiceProvider;
-use Wizofgoz\Cryptographer\OpenSslEncrypter;
+use Wizofgoz\Cryptographer\Schema\OpenSslSchema;
 
 class EncryptionTest extends TestCase
 {
@@ -17,7 +17,7 @@ class EncryptionTest extends TestCase
             'drivers' => [
                 'default' => [
                     'schema' => 'openssl',
-                    'cipher' => OpenSslEncrypter::AES_256,
+                    'cipher' => OpenSslSchema::CIPHER_AES_256,
                     'key'    => 'base64:IUHRqAQ99pZ0A1MPjbuv1D6ff3jxv0GIvS2qIW4JNU4=',
                 ],
             ],
@@ -67,7 +67,7 @@ class EncryptionTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $this->app['config']->set('cryptographer.drivers.default.key', str_repeat('z', 32));
-        $this->app['config']->set('cryptographer.drivers.default.cipher', OpenSslEncrypter::AES_128);
+        $this->app['config']->set('cryptographer.drivers.default.cipher', OpenSslSchema::CIPHER_AES_128);
 
         $e = $this->app->make('encrypter');
 

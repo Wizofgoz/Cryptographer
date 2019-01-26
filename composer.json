@@ -42,5 +42,8 @@
         "Wizofgoz\\Cryptographer\\EncryptionServiceProvider"
       ]
     }
+  },
+  "suggest": {
+    "ext-sodium": "Required to use sodium schema"
   }
 }
