@@ -52,6 +52,7 @@ abstract class Schema implements SchemaContract
      * Determine the cipher that should be considered.
      *
      * @param string|null $cipher
+     *
      * @return string
      */
     protected static function resolveCipher($cipher = null)
@@ -66,8 +67,9 @@ abstract class Schema implements SchemaContract
     /**
      * Determine if the given key and cipher combination is valid.
      *
-     * @param  string  $key
-     * @param  string  $cipher
+     * @param string $key
+     * @param string $cipher
+     *
      * @return bool
      */
     protected static function supported($key, $cipher)
@@ -108,9 +110,9 @@ abstract class Schema implements SchemaContract
     /**
      * Generate an appropriate nonce for the current cipher.
      *
-     * @return string
-     *
      * @throws \Exception
+     *
+     * @return string
      */
     protected function generateNonce()
     {
