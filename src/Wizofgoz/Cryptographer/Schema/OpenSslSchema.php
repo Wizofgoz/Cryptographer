@@ -4,14 +4,13 @@ namespace Wizofgoz\Cryptographer\Schema;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\EncryptException;
-use RuntimeException;
-use Wizofgoz\Cryptographer\Contracts\Schema;
 
-class OpenSslSchema implements Schema
+class OpenSslSchema extends Schema
 {
     const CIPHER_AES_128 = 'AES-128-CBC';
-
     const CIPHER_AES_256 = 'AES-256-CBC';
+
+    const DEFAULT_CIPHER = self::CIPHER_AES_128;
 
     const KEY_LENGTHS = [
         self::CIPHER_AES_128 => 16,
@@ -19,71 +18,13 @@ class OpenSslSchema implements Schema
     ];
 
     /**
-     * The encryption key.
+     * Get the appropriate nonce length for the current cipher.
      *
-     * @var string
+     * @return int
      */
-    protected $key;
-
-    /**
-     * The algorithm used for encryption.
-     *
-     * @var string
-     */
-    protected $cipher;
-
-    /**
-     * Create a new encrypter instance.
-     *
-     * @param string $key
-     * @param string $cipher
-     *
-     * @return void
-     */
-    public function __construct($key, $cipher = self::CIPHER_AES_128)
+    protected function getNonceLength()
     {
-        $key = (string) $key;
-
-        if (static::supported($key, $cipher)) {
-            $this->key = $key;
-            $this->cipher = $cipher;
-        } else {
-            throw new RuntimeException('The only supported ciphers are AES-128-CBC and AES-256-CBC with the correct key lengths.');
-        }
-    }
-
-    /**
-     * Determine if the given key and cipher combination is valid.
-     *
-     * @param string $key
-     * @param string $cipher
-     *
-     * @return bool
-     */
-    public static function supported($key, $cipher)
-    {
-        $length = mb_strlen($key, '8bit');
-
-        return isset(static::KEY_LENGTHS[$cipher]) && $length === static::KEY_LENGTHS[$cipher];
-    }
-
-    /**
-     * Create a new encryption key for the given cipher.
-     *
-     * @param string|null $cipher
-     *
-     * @throws \Exception
-     * @throws \InvalidArgumentException
-     *
-     * @return string
-     */
-    public static function generateKey($cipher = self::CIPHER_AES_128)
-    {
-        if (!isset(static::KEY_LENGTHS[$cipher])) {
-            throw new \InvalidArgumentException("{$cipher} is not a supported cipher.");
-        }
-
-        return random_bytes(static::KEY_LENGTHS[$cipher]);
+        return openssl_cipher_iv_length($this->cipher);
     }
 
     /**
@@ -99,7 +40,7 @@ class OpenSslSchema implements Schema
      */
     public function encrypt($value, $serialize = true)
     {
-        $iv = random_bytes(openssl_cipher_iv_length($this->cipher));
+        $iv = $this->generateNonce();
 
         // First we will encrypt the value using OpenSSL. After this is encrypted we
         // will proceed to calculating a MAC for the encrypted value so that this
@@ -273,15 +214,5 @@ class OpenSslSchema implements Schema
         return hash_hmac(
             'sha256', $this->hash($payload['iv'], $payload['value']), $bytes, true
         );
-    }
-
-    /**
-     * Get the encryption key.
-     *
-     * @return string
-     */
-    public function getKey()
-    {
-        return $this->key;
     }
 }
