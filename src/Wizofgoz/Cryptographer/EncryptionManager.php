@@ -194,7 +194,7 @@ class EncryptionManager
     /**
      * Register a key generator for the given driver.
      *
-     * @param string $engine
+     * @param string   $engine
      * @param \Closure $generator
      */
     public static function registerKeyGenerator($engine, Closure $generator)
