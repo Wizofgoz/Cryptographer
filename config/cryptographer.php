@@ -20,8 +20,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | This is a list of the drivers available to your application. Driver
-    | definitions must include the schema, cipher, and key options. The only
-    | supported schemas at this time are 'openssl' and 'sodium' but others can be
+    | definitions must include the engine, cipher, and key options. The only
+    | supported engines at this time are 'openssl' and 'sodium' but others can be
     | added via 3rd party packages.
     |
     */
@@ -29,8 +29,8 @@ return [
     'drivers' => [
 
         'default' => [
-            'schema' => 'openssl',
-            'cipher' => \Wizofgoz\Cryptographer\Schema\OpenSslSchema::CIPHER_AES_128,
+            'engine' => 'openssl',
+            'cipher' => \Wizofgoz\Cryptographer\Engines\OpenSslEngine::CIPHER_AES_128,
             'key'    => env('APP_KEY'),
         ],
 

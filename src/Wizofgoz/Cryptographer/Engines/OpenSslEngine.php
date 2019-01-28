@@ -1,11 +1,11 @@
 <?php
 
-namespace Wizofgoz\Cryptographer\Schema;
+namespace Wizofgoz\Cryptographer\Engines;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\EncryptException;
 
-class OpenSslSchema extends Schema
+class OpenSslEngine extends Engine
 {
     const CIPHER_AES_128 = 'AES-128-CBC';
     const CIPHER_AES_256 = 'AES-256-CBC';

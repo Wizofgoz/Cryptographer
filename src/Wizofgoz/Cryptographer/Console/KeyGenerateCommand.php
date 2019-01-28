@@ -17,9 +17,9 @@ class KeyGenerateCommand extends Command
      */
     protected $signature = 'crypt:key:generate
                     {--D|driver= : Manually enter a driver to generate a key for}
-                    {--S|schema= : Manually enter a schema to generate a key for}
+                    {--E|engine= : Manually enter an engine to generate a key for}
                     {--C|cipher= : Manually enter a cipher to generate a key for}
-                    {--E|environment= : Save the new key to env file under a custom name}
+                    {--environment= : Save the new key to env file under a custom name}
                     {--show : Display the key instead of modifying files}
                     {--force : Force the operation to run when in production}';
 
@@ -44,9 +44,9 @@ class KeyGenerateCommand extends Command
         $this->driver = $this->option('driver') ?? $this->getDefaultDriver();
         $this->env = $this->option('environment') ?? 'APP_KEY';
 
-        $schema = $this->option('schema') ?? $this->laravel['config']["cryptographer.drivers.{$this->driver}.schema"];
+        $engine = $this->option('engine') ?? $this->laravel['config']["cryptographer.drivers.{$this->driver}.engine"];
         $cipher = $this->option('cipher') ?? $this->laravel['config']["cryptographer.drivers.{$this->driver}.cipher"];
-        $key = $this->generateRandomKey($schema, $cipher);
+        $key = $this->generateRandomKey($engine, $cipher);
 
         if ($this->option('show')) {
             return $this->line('<comment>'.$key.'</comment>');
@@ -76,15 +76,15 @@ class KeyGenerateCommand extends Command
     /**
      * Generate a random key for the application.
      *
-     * @param string $schema
+     * @param string $engine
      * @param string $cipher
      *
      * @return string
      */
-    protected function generateRandomKey($schema, $cipher)
+    protected function generateRandomKey($engine, $cipher)
     {
         return 'base64:'.base64_encode(
-            EncryptionManager::generateKey($schema, $cipher)
+            EncryptionManager::generateKey($engine, $cipher)
         );
     }
 

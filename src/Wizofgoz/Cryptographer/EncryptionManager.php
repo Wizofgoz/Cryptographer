@@ -7,9 +7,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
-use Wizofgoz\Cryptographer\Contracts\Schema;
-use Wizofgoz\Cryptographer\Schema\OpenSslSchema;
-use Wizofgoz\Cryptographer\Schema\SodiumSchema;
+use Wizofgoz\Cryptographer\Contracts\Engine;
+use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
+use Wizofgoz\Cryptographer\Engines\SodiumEngine;
 
 class EncryptionManager
 {
@@ -26,7 +26,7 @@ class EncryptionManager
     protected $app;
 
     /**
-     * The registered custom schema creators.
+     * The registered custom engine creators.
      *
      * @var \Closure[]
      */
@@ -35,7 +35,7 @@ class EncryptionManager
     /**
      * The array of created "drivers".
      *
-     * @var Schema[]
+     * @var Engine[]
      */
     protected $drivers = [];
 
@@ -132,95 +132,95 @@ class EncryptionManager
      */
     protected function createDriver($config)
     {
-        $schema = $config['schema'];
+        $engine = $config['engine'];
 
         // First, we will determine if a custom driver creator exists for the given driver and
         // if it does not we will check for a creator method for the driver. Custom creator
         // callbacks allow developers to build their own "drivers" easily using Closures.
-        if (isset($this->customCreators[$schema])) {
-            return $this->callCustomCreator($schema, $config);
+        if (isset($this->customCreators[$engine])) {
+            return $this->callCustomCreator($engine, $config);
         } else {
-            $method = 'create'.Str::studly($schema).'Schema';
+            $method = 'create'.Str::studly($engine).'Engine';
 
             if (method_exists($this, $method)) {
                 return $this->$method($config);
             }
         }
 
-        throw new InvalidArgumentException("Schema [$schema] not supported.");
+        throw new InvalidArgumentException("Engine [$engine] not supported.");
     }
 
     /**
      * Call a custom driver creator.
      *
-     * @param string $schema
+     * @param string $engine
      * @param array  $config
      *
      * @return mixed
      */
-    protected function callCustomCreator($schema, $config)
+    protected function callCustomCreator($engine, $config)
     {
-        return $this->customCreators[$schema]($config);
+        return $this->customCreators[$engine]($config);
     }
 
     /**
-     * Create an instance of the OpenSSL encryption Schema.
+     * Create an instance of the OpenSSL encryption engine.
      *
      * @param array $config
      *
-     * @return \Wizofgoz\Cryptographer\Schema\OpenSslSchema
+     * @return \Wizofgoz\Cryptographer\Engines\OpenSslEngine
      */
-    public function createOpenSslSchema(array $config)
+    public function createOpenSslEngine(array $config)
     {
-        return new OpenSslSchema($config['key'], $config['cipher']);
+        return new OpenSslEngine($config['key'], $config['cipher']);
     }
 
     /**
-     * Create an instance of the Sodium encryption Schema.
+     * Create an instance of the Sodium encryption engine.
      *
      * @param array $config
      *
-     * @return \Wizofgoz\Cryptographer\Schema\SodiumSchema
+     * @return \Wizofgoz\Cryptographer\Engines\SodiumEngine
      */
-    public function createSodiumSchema(array $config)
+    public function createSodiumEngine(array $config)
     {
         if (!extension_loaded('sodium')) {
-            throw new RuntimeException('Sodium PHP extension is required to use the sodium schema.');
+            throw new RuntimeException('Sodium PHP extension is required to use the sodium engine.');
         }
 
-        return new SodiumSchema($config['key'], $config['cipher']);
+        return new SodiumEngine($config['key'], $config['cipher']);
     }
 
     /**
      * Register a key generator for the given driver.
      *
-     * @param $schema
+     * @param string   $engine
      * @param \Closure $generator
      */
-    public static function registerKeyGenerator($schema, Closure $generator)
+    public static function registerKeyGenerator($engine, Closure $generator)
     {
-        static::$keyGenerators[$schema] = $generator;
+        static::$keyGenerators[$engine] = $generator;
     }
 
     /**
      * Create a new encryption key for the cipher.
      *
-     * @param string      $schema
+     * @param string      $engine
      * @param string|null $cipher
      *
      * @return string
      */
-    public static function generateKey($schema, $cipher = null)
+    public static function generateKey($engine, $cipher = null)
     {
-        if (!isset(static::$keyGenerators[$schema])) {
-            throw new InvalidArgumentException("Key generator not found for [{$schema}] schema.");
+        if (!isset(static::$keyGenerators[$engine])) {
+            throw new InvalidArgumentException("Key generator not found for [{$engine}] engine.");
         }
 
-        /** @var Schema $keyGenerator */
-        $keyGenerator = (static::$keyGenerators[$schema])();
+        /** @var Engine $keyGenerator */
+        $keyGenerator = (static::$keyGenerators[$engine])();
 
         if (!class_exists($keyGenerator)) {
-            throw new RuntimeException("Key generator class [{$keyGenerator}] not found for [{$schema}] schema.");
+            throw new RuntimeException("Key generator class [{$keyGenerator}] not found for [{$engine}] engine.");
         }
 
         return $keyGenerator::generateKey($cipher);
@@ -285,16 +285,16 @@ class EncryptionManager
     }
 
     /**
-     * Register a custom schema creator Closure.
+     * Register a custom engine creator Closure.
      *
-     * @param string   $schema
+     * @param string   $engine
      * @param \Closure $callback
      *
      * @return $this
      */
-    public function extend($schema, Closure $callback)
+    public function extend($engine, Closure $callback)
     {
-        $this->customCreators[$schema] = $callback;
+        $this->customCreators[$engine] = $callback;
 
         return $this;
     }

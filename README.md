@@ -28,35 +28,35 @@ This option allows you to define the default driver to use when using the encryp
 `'default' => 'default'`
 
 ### Available Drivers
-This option allows for defining the encryption drivers available to your application. Each entry in the list MUST contain a schema, cipher, and key for proper use.
+This option allows for defining the encryption drivers available to your application. Each entry in the list MUST contain an engine, cipher, and key for proper use.
 
 ```php
 'drivers' => [
     'default' => [
-        'schema' => 'openssl',
-        'cipher' => OpenSslSchema::CIPHER_AES_128,
+        'engine' => 'openssl',
+        'cipher' => OpenSslEngine::CIPHER_AES_128,
         'key'    => env('APP_KEY'),
     ],
 ],
 ```
-## Available Schemas
+## Available Engines
 ### OpenSSL
-The `openssl` schema is drop-in replacement for Laravel's encryption system that will work with existing keys assuming the cipher is set correctly.
+The `openssl` engine is drop-in replacement for Laravel's encryption system that will work with existing keys assuming the cipher is set correctly.
 
 #### Supported Ciphers
 
-- `OpenSslSchema::CIPHER_AES_128`: AES-128-CBC - default
-- `OpenSslSchema::CIPHER_AES_256`: AES-256-CBC
+- `OpenSslEngine::CIPHER_AES_128`: AES-128-CBC - default
+- `OpenSslEngine::CIPHER_AES_256`: AES-256-CBC
 
 ### Sodium
-The `sodium` schema depends on the [Sodium](http://php.net/manual/en/book.sodium.php) PHP extension and will not be available if it is missing. In PHP 7.2+, the Sodium extension is part of the core and should always be available.
+The `sodium` engine depends on the [Sodium](http://php.net/manual/en/book.sodium.php) PHP extension and will not be available if it is missing. In PHP 7.2+, the Sodium extension is part of the core and should always be available.
 
 #### Supported Ciphers
 
-- `SodiumSchema::CIPHER_AES_256`: AES-256-GCM - requires hardware support
-- `SodiumSchema::CIPHER_CHACHA`: CHACHA-20-POLY-1305
-- `SodiumSchema::CIPHER_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF
-- `SodiumSchema::CIPHER_X_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF - default
+- `SodiumEngine::CIPHER_AES_256`: AES-256-GCM - requires hardware support
+- `SodiumEngine::CIPHER_CHACHA`: CHACHA-20-POLY-1305
+- `SodiumEngine::CIPHER_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF
+- `SodiumEngine::CIPHER_X_CHACHA_IETF`: XCHACHA-20-POLY-1305-IETF - default
 
 ## Usage
 This package integrates with Laravel's encryption system and either the built-in `encrypt()` and `decrypt()` helpers or the `Crypt` facade may be used when you want to utilize your default driver.
@@ -73,28 +73,28 @@ $encrypted = Crypt::driver('something')->encrypt('Hello world.');
 Encryption keys can be generated using the command `php artisan crypt:key:generate` and there are the following options available:
 
 - `--driver` the name of the driver from your configuration to use.
-- `--schema` an override of the schema to use when generating a key.
+- `--engine` an override of the engine to use when generating a key.
 - `--cipher` an override of the cipher to use when generating a key.
 - `--environment` what environment variable to set in your .env file. Defaults to `APP_KEY`.
 - `--show` to display the key instead of applying it to configuration and environment.
 - `--force` force the operation to run when in production.
 
 ## Extensions
-Custom schemas can be added by simply extending `EncryptionManager` and registering a key generator in your service provider's `register` function:
+Custom engines can be added by simply extending `EncryptionManager` and registering a key generator in your service provider's `register` function:
 
 ```php
 public function register()
 {
-    EncryptionManager::registerKeyGenerator('schema_name', function () {
-        return SpecialSchema::class;
+    EncryptionManager::registerKeyGenerator('engine_name', function () {
+        return CustomEngine::class;
     });
 
     $this->app->resolving('encrypter', function ($encrypter) {
-        $encrypter->extend('schema_name', function ($config) {
-            return new SpecialSchema($config);
+        $encrypter->extend('engine_name', function ($config) {
+            return new CustomEngine($config);
         });
     });
 }
 ```
 
-Custom schemas are expected to implement the `Wizofgoz\Cryptographer\Contracts\Schema` contract.
+Custom engines are expected to implement the `Wizofgoz\Cryptographer\Contracts\Engine` contract.
