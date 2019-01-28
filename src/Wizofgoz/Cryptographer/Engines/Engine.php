@@ -1,11 +1,11 @@
 <?php
 
-namespace Wizofgoz\Cryptographer\Schema;
+namespace Wizofgoz\Cryptographer\Engines;
 
 use RuntimeException;
-use Wizofgoz\Cryptographer\Contracts\Schema as SchemaContract;
+use Wizofgoz\Cryptographer\Contracts\Engine as EngineContract;
 
-abstract class Schema implements SchemaContract
+abstract class Engine implements EngineContract
 {
     const KEY_LENGTHS = [];
 
@@ -26,7 +26,7 @@ abstract class Schema implements SchemaContract
     protected $cipher;
 
     /**
-     * Create a new schema instance.
+     * Create a new engine instance.
      *
      * @param string $key
      * @param string $cipher
@@ -47,6 +47,48 @@ abstract class Schema implements SchemaContract
             throw new RuntimeException("The only supported ciphers are {$supported} with the correct key lengths.");
         }
     }
+
+    /**
+     * Encrypt the given value.
+     *
+     * @param mixed $value
+     * @param bool  $serialize
+     *
+     * @return mixed
+     */
+    abstract public function encrypt($value, $serialize = true);
+
+    /**
+     * Encrypt a string without serialization.
+     *
+     * @param string $value
+     *
+     * @throws \Illuminate\Contracts\Encryption\EncryptException
+     *
+     * @return string
+     */
+    abstract public function encryptString($value);
+
+    /**
+     * Decrypt the given value.
+     *
+     * @param mixed $payload
+     * @param bool  $unserialize
+     *
+     * @return mixed
+     */
+    abstract public function decrypt($payload, $unserialize = true);
+
+    /**
+     * Decrypt the given string without unserialization.
+     *
+     * @param string $payload
+     *
+     * @throws \Illuminate\Contracts\Encryption\DecryptException
+     *
+     * @return string
+     */
+    abstract public function decryptString($payload);
 
     /**
      * Determine the cipher that should be considered.

@@ -2,7 +2,7 @@
 
 namespace Wizofgoz\Cryptographer\Contracts;
 
-interface Schema
+interface Engine
 {
     /**
      * Encrypt the given value.

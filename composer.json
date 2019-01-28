@@ -44,6 +44,6 @@
     }
   },
   "suggest": {
-    "ext-sodium": "Required to use sodium schema"
+    "ext-sodium": "Required to use sodium engine"
   }
 }

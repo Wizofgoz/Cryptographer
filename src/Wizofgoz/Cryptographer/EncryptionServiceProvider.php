@@ -4,8 +4,8 @@ namespace Wizofgoz\Cryptographer;
 
 use Illuminate\Support\ServiceProvider;
 use Wizofgoz\Cryptographer\Console\KeyGenerateCommand;
-use Wizofgoz\Cryptographer\Schema\OpenSslSchema;
-use Wizofgoz\Cryptographer\Schema\SodiumSchema;
+use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
+use Wizofgoz\Cryptographer\Engines\SodiumEngine;
 
 class EncryptionServiceProvider extends ServiceProvider
 {
@@ -43,11 +43,11 @@ class EncryptionServiceProvider extends ServiceProvider
     protected function registerServices()
     {
         EncryptionManager::registerKeyGenerator('openssl', function () {
-            return OpenSslSchema::class;
+            return OpenSslEngine::class;
         });
 
         EncryptionManager::registerKeyGenerator('sodium', function () {
-            return SodiumSchema::class;
+            return SodiumEngine::class;
         });
 
         $this->app->singleton('encrypter', function ($app) {

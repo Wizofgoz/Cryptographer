@@ -3,9 +3,9 @@
 namespace Wizofgoz\Cryptographer\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Wizofgoz\Cryptographer\Schema\SodiumSchema;
+use Wizofgoz\Cryptographer\Engines\SodiumEngine;
 
-class SodiumSchemaTest extends TestCase
+class SodiumEngineTest extends TestCase
 {
     protected function setUp()
     {
@@ -18,7 +18,7 @@ class SodiumSchemaTest extends TestCase
 
     public function testGenerateKey()
     {
-        $f = new SodiumSchema(SodiumSchema::generateKey());
+        $f = new SodiumEngine(SodiumEngine::generateKey());
 
         $plaintext = 'bar';
         $ciphertext = $f->encrypt($plaintext);
@@ -28,7 +28,7 @@ class SodiumSchemaTest extends TestCase
 
     public function testGenerateKeyWithChachaCipher()
     {
-        $f = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_CHACHA), SodiumSchema::CIPHER_CHACHA);
+        $f = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_CHACHA), SodiumEngine::CIPHER_CHACHA);
 
         $plaintext = 'bar';
         $ciphertext = $f->encrypt($plaintext);
@@ -42,7 +42,7 @@ class SodiumSchemaTest extends TestCase
             $this->markTestSkipped('AES-256-GCM is not supported for this architecture');
         }
 
-        $f = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_AES_256), SodiumSchema::CIPHER_AES_256);
+        $f = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_AES_256), SodiumEngine::CIPHER_AES_256);
 
         $plaintext = 'bar';
         $ciphertext = $f->encrypt($plaintext);
@@ -52,7 +52,7 @@ class SodiumSchemaTest extends TestCase
 
     public function testGenerateKeyWithXChachaIETFCipher()
     {
-        $f = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_X_CHACHA_IETF), SodiumSchema::CIPHER_X_CHACHA_IETF);
+        $f = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_X_CHACHA_IETF), SodiumEngine::CIPHER_X_CHACHA_IETF);
 
         $plaintext = 'bar';
         $ciphertext = $f->encrypt($plaintext);
@@ -62,7 +62,7 @@ class SodiumSchemaTest extends TestCase
 
     public function testEncryption()
     {
-        $e = new SodiumSchema(SodiumSchema::generateKey());
+        $e = new SodiumEngine(SodiumEngine::generateKey());
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -71,7 +71,7 @@ class SodiumSchemaTest extends TestCase
 
     public function testRawStringEncryption()
     {
-        $e = new SodiumSchema(SodiumSchema::generateKey());
+        $e = new SodiumEngine(SodiumEngine::generateKey());
         $encrypted = $e->encryptString('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -80,13 +80,13 @@ class SodiumSchemaTest extends TestCase
 
     public function testWithChachaCipher()
     {
-        $e = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_CHACHA), SodiumSchema::CIPHER_CHACHA);
+        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_CHACHA), SodiumEngine::CIPHER_CHACHA);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_CHACHA), SodiumSchema::CIPHER_CHACHA);
+        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_CHACHA), SodiumEngine::CIPHER_CHACHA);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -99,13 +99,13 @@ class SodiumSchemaTest extends TestCase
             $this->markTestSkipped('AES-256-GCM is not supported for this architecture');
         }
 
-        $e = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_AES_256), SodiumSchema::CIPHER_AES_256);
+        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_AES_256), SodiumEngine::CIPHER_AES_256);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_AES_256), SodiumSchema::CIPHER_AES_256);
+        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_AES_256), SodiumEngine::CIPHER_AES_256);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -114,13 +114,13 @@ class SodiumSchemaTest extends TestCase
 
     public function testWithXChachaIETFCipher()
     {
-        $e = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_X_CHACHA_IETF), SodiumSchema::CIPHER_X_CHACHA_IETF);
+        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_X_CHACHA_IETF), SodiumEngine::CIPHER_X_CHACHA_IETF);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new SodiumSchema(SodiumSchema::generateKey(SodiumSchema::CIPHER_X_CHACHA_IETF), SodiumSchema::CIPHER_X_CHACHA_IETF);
+        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_X_CHACHA_IETF), SodiumEngine::CIPHER_X_CHACHA_IETF);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -133,7 +133,7 @@ class SodiumSchemaTest extends TestCase
      */
     public function testExceptionThrownWhenPayloadIsInvalid()
     {
-        $e = new SodiumSchema(SodiumSchema::generateKey());
+        $e = new SodiumEngine(SodiumEngine::generateKey());
 
         $payload = $e->encrypt('foo');
 
@@ -148,8 +148,8 @@ class SodiumSchemaTest extends TestCase
      */
     public function testExceptionThrownWithDifferentKey()
     {
-        $a = new SodiumSchema(SodiumSchema::generateKey());
-        $b = new SodiumSchema(SodiumSchema::generateKey());
+        $a = new SodiumEngine(SodiumEngine::generateKey());
+        $b = new SodiumEngine(SodiumEngine::generateKey());
 
         $b->decrypt($a->encrypt('baz'));
     }
