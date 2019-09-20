@@ -20,14 +20,16 @@ class awsKeyDriver implements KeyDriver
         $this->awsClient = new KmsClient([
             'profile' => 'default',
             'version' => 'latest',
-            'region' => $this->options['region']
+            'region'  => $this->options['region'],
         ]);
     }
 
     /**
      * @param $length
-     * @return string
+     *
      * @throws \Exception
+     *
+     * @return string
      */
     public static function generateKey($length)
     {
@@ -58,7 +60,7 @@ class awsKeyDriver implements KeyDriver
         if (isset($this->options['context'])) {
             $options['EncryptionContext'] = $this->options['context'];
         }
-        
+
         $response = $this->awsClient->decrypt($options);
 
         return $response['Plaintext'];
