@@ -15,8 +15,10 @@ class LocalKeyDriver implements KeyDriver
 
     /**
      * @param $length
-     * @return string
+     *
      * @throws \Exception
+     *
+     * @return string
      */
     public static function generateKey($length)
     {

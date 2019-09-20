@@ -172,7 +172,7 @@ class EncryptionManager
      * Create an instance of the OpenSSL encryption engine.
      *
      * @param KeyDriver $keyDriver
-     * @param array $config
+     * @param array     $config
      *
      * @return \Wizofgoz\Cryptographer\Engines\OpenSslEngine
      */
@@ -185,7 +185,7 @@ class EncryptionManager
      * Create an instance of the Sodium encryption engine.
      *
      * @param KeyDriver $keyDriver
-     * @param array $config
+     * @param array     $config
      *
      * @return \Wizofgoz\Cryptographer\Engines\SodiumEngine
      */

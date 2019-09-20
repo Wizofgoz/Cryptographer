@@ -53,17 +53,17 @@ return [
     'keys' => [
         'default' => [
             'management' => 'local',
-            'value' => env('APP_KEY'),
+            'value'      => env('APP_KEY'),
         ],
 
         'kms' => [
             'management' => 'aws',
-            'value' => 'encrypted_data_key',
-            'region' => 'aws_region',
-            'rotation' => true,
+            'value'      => 'encrypted_data_key',
+            'region'     => 'aws_region',
+            'rotation'   => true,
             'master-key' => 'key_id_for_making_data_key',
-            'context' => [], // optional key/values for authenticating
+            'context'    => [], // optional key/values for authenticating
 
-        ]
+        ],
     ],
 ];

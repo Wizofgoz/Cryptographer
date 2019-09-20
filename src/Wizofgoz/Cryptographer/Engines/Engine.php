@@ -30,7 +30,7 @@ abstract class Engine implements EngineContract
      * Create a new engine instance.
      *
      * @param KeyDriver $keyDriver
-     * @param string $cipher
+     * @param string    $cipher
      *
      * @return void
      */
