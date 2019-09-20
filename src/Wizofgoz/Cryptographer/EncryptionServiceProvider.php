@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Wizofgoz\Cryptographer\Console\KeyGenerateCommand;
 use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
 use Wizofgoz\Cryptographer\Engines\SodiumEngine;
+use Wizofgoz\Cryptographer\KeyDrivers\LocalKeyDriver;
 
 class EncryptionServiceProvider extends ServiceProvider
 {
@@ -42,16 +43,28 @@ class EncryptionServiceProvider extends ServiceProvider
      */
     protected function registerServices()
     {
-        EncryptionManager::registerKeyGenerator('openssl', function () {
+        EncryptionManager::registerEngine('openssl', function () {
             return OpenSslEngine::class;
         });
 
-        EncryptionManager::registerKeyGenerator('sodium', function () {
+        EncryptionManager::registerEngine('sodium', function () {
             return SodiumEngine::class;
+        });
+
+        KeyManager::registerDriver('local', function () {
+            return LocalKeyDriver::class;
+        });
+
+        KeyManager::registerDriver('aws', function () {
+            return LocalKeyDriver::class;
         });
 
         $this->app->singleton('encrypter', function ($app) {
             return new EncryptionManager($app);
+        });
+
+        $this->app->singleton('key-manager', function ($app) {
+            return new KeyManager($app);
         });
     }
 

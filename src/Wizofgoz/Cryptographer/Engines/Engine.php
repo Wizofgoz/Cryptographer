@@ -4,6 +4,7 @@ namespace Wizofgoz\Cryptographer\Engines;
 
 use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\Engine as EngineContract;
+use Wizofgoz\Cryptographer\Contracts\KeyDriver;
 
 abstract class Engine implements EngineContract
 {
@@ -14,9 +15,9 @@ abstract class Engine implements EngineContract
     /**
      * The encryption key.
      *
-     * @var string
+     * @var KeyDriver
      */
-    protected $key;
+    protected $keyDriver;
 
     /**
      * The algorithm used for encryption.
@@ -28,18 +29,17 @@ abstract class Engine implements EngineContract
     /**
      * Create a new engine instance.
      *
-     * @param string $key
+     * @param KeyDriver $keyDriver
      * @param string $cipher
      *
      * @return void
      */
-    public function __construct($key, $cipher = null)
+    public function __construct(KeyDriver $keyDriver, $cipher = null)
     {
         $cipher = static::resolveCipher($cipher);
-        $key = (string) $key;
 
-        if (static::supported($key, $cipher)) {
-            $this->key = $key;
+        if (static::supported($keyDriver->getKey(), $cipher)) {
+            $this->keyDriver = $keyDriver;
             $this->cipher = $cipher;
         } else {
             $supported = implode(', ', array_keys(static::KEY_LENGTHS));
@@ -118,20 +118,19 @@ abstract class Engine implements EngineContract
     {
         $length = mb_strlen($key, '8bit');
 
-        return isset(static::KEY_LENGTHS[$cipher]) && $length === static::KEY_LENGTHS[$cipher];
+        return $length === self::getKeyLength($cipher);
     }
 
     /**
-     * Create a new encryption key for the given cipher.
+     * Get the required length of key for the given cipher.
      *
      * @param string|null $cipher
      *
-     * @throws \Exception
      * @throws \InvalidArgumentException
      *
-     * @return string
+     * @return mixed
      */
-    public static function generateKey($cipher = null)
+    public static function getKeyLength($cipher = null)
     {
         $cipher = static::resolveCipher($cipher);
 
@@ -139,7 +138,7 @@ abstract class Engine implements EngineContract
             throw new \InvalidArgumentException("{$cipher} is not a supported cipher.");
         }
 
-        return random_bytes(static::KEY_LENGTHS[$cipher]);
+        return static::KEY_LENGTHS[$cipher];
     }
 
     /**
@@ -168,6 +167,6 @@ abstract class Engine implements EngineContract
      */
     public function getKey()
     {
-        return $this->key;
+        return $this->keyDriver->getKey();
     }
 }

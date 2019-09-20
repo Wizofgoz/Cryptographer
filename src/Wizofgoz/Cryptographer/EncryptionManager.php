@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\Engine;
+use Wizofgoz\Cryptographer\Contracts\KeyDriver;
 use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
 use Wizofgoz\Cryptographer\Engines\SodiumEngine;
 
@@ -16,7 +17,7 @@ class EncryptionManager
     /**
      * @var \Closure[]
      */
-    protected static $keyGenerators = [];
+    protected static $engineMap = [];
 
     /**
      * The application instance.
@@ -133,17 +134,20 @@ class EncryptionManager
     protected function createDriver($config)
     {
         $engine = $config['engine'];
+        /** @var KeyManager $keyManager */
+        $keyManager = $this->app->get('key-manager');
+        $keyDriver = $keyManager->driver($config['key']);
 
         // First, we will determine if a custom driver creator exists for the given driver and
         // if it does not we will check for a creator method for the driver. Custom creator
         // callbacks allow developers to build their own "drivers" easily using Closures.
         if (isset($this->customCreators[$engine])) {
-            return $this->callCustomCreator($engine, $config);
+            return $this->callCustomCreator($engine, $keyDriver, $config);
         } else {
             $method = 'create'.Str::studly($engine).'Engine';
 
             if (method_exists($this, $method)) {
-                return $this->$method($config);
+                return $this->$method($keyDriver, $config);
             }
         }
 
@@ -153,77 +157,81 @@ class EncryptionManager
     /**
      * Call a custom driver creator.
      *
-     * @param string $engine
-     * @param array  $config
+     * @param string    $engine
+     * @param KeyDriver $keyDriver
+     * @param array     $config
      *
      * @return mixed
      */
-    protected function callCustomCreator($engine, $config)
+    protected function callCustomCreator($engine, KeyDriver $keyDriver, array $config)
     {
-        return $this->customCreators[$engine]($config);
+        return $this->customCreators[$engine]($keyDriver, $config);
     }
 
     /**
      * Create an instance of the OpenSSL encryption engine.
      *
+     * @param KeyDriver $keyDriver
      * @param array $config
      *
      * @return \Wizofgoz\Cryptographer\Engines\OpenSslEngine
      */
-    public function createOpenSslEngine(array $config)
+    public function createOpenSslEngine(KeyDriver $keyDriver, array $config)
     {
-        return new OpenSslEngine($config['key'], $config['cipher']);
+        return new OpenSslEngine($keyDriver, $config['cipher']);
     }
 
     /**
      * Create an instance of the Sodium encryption engine.
      *
+     * @param KeyDriver $keyDriver
      * @param array $config
      *
      * @return \Wizofgoz\Cryptographer\Engines\SodiumEngine
      */
-    public function createSodiumEngine(array $config)
+    public function createSodiumEngine(KeyDriver $keyDriver, array $config)
     {
         if (!extension_loaded('sodium')) {
             throw new RuntimeException('Sodium PHP extension is required to use the sodium engine.');
         }
 
-        return new SodiumEngine($config['key'], $config['cipher']);
+        return new SodiumEngine($keyDriver, $config['cipher']);
     }
 
     /**
-     * Register a key generator for the given driver.
+     * Register the given encryption engine.
      *
      * @param string   $engine
      * @param \Closure $generator
      */
-    public static function registerKeyGenerator($engine, Closure $generator)
+    public static function registerEngine($engine, Closure $generator)
     {
-        static::$keyGenerators[$engine] = $generator;
+        static::$engineMap[$engine] = $generator;
     }
 
     /**
      * Create a new encryption key for the cipher.
      *
      * @param string      $engine
+     * @param string      $keyDriver
      * @param string|null $cipher
      *
      * @return string
      */
-    public static function generateKey($engine, $cipher = null)
+    public static function generateKey($engine, $keyDriver, $cipher = null)
     {
-        if (!isset(static::$keyGenerators[$engine])) {
+        if (!isset(static::$engineMap[$engine])) {
             throw new InvalidArgumentException("Key generator not found for [{$engine}] engine.");
         }
 
         /** @var Engine $keyGenerator */
-        $keyGenerator = (static::$keyGenerators[$engine])();
+        $keyGenerator = (static::$engineMap[$engine])();
 
         if (!class_exists($keyGenerator)) {
             throw new RuntimeException("Key generator class [{$keyGenerator}] not found for [{$engine}] engine.");
         }
 
-        return $keyGenerator::generateKey($cipher);
+        return KeyManager::generateKey($keyDriver, $keyGenerator::getKeyLength($cipher));
     }
 
     /**
@@ -327,7 +335,7 @@ class EncryptionManager
     public function getDefaultDriver()
     {
         // if a default isn't set in the config, use the first in the list of drivers
-        return $this->app['config']['cryptographer.default'] ?? reset(array_keys($this->app['config']['cryptographer.drivers']));
+        return $this->app['config']['cryptographer.default-driver'] ?? reset(array_keys($this->app['config']['cryptographer.drivers']));
     }
 
     /**
