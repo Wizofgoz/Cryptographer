@@ -2,13 +2,13 @@
 
 use Wizofgoz\Cryptographer\Crypt;
 
-if (!function_exists('ncrypt'))
-{
+if (!function_exists('ncrypt')) {
     /**
-     * Encrypt the given value using the requested driver
+     * Encrypt the given value using the requested driver.
      *
-     * @param mixed $value
+     * @param mixed       $value
      * @param string|null $driver
+     *
      * @return mixed
      */
     function ncrypt($value, $driver = null)
@@ -17,13 +17,13 @@ if (!function_exists('ncrypt'))
     }
 }
 
-if (!function_exists('ncrypt'))
-{
+if (!function_exists('ncrypt')) {
     /**
-     * Decrypt the given value using the requested driver
+     * Decrypt the given value using the requested driver.
      *
-     * @param mixed $value
+     * @param mixed       $value
      * @param string|null $driver
+     *
      * @return mixed
      */
     function dcrypt($value, $driver = null)

@@ -57,15 +57,13 @@ class AwsKeyDriver implements KeyDriver
             $arnPieces = explode($options['master-key'], ':');
             $options['region'] = $arnPieces[3];
         }
-
-        return null;
     }
 
     protected function getKeyMeta()
     {
         $callback = function () {
             return $this->awsClient->describeKey([
-                'KeyId' => $this->options['master-key']
+                'KeyId' => $this->options['master-key'],
             ]);
         };
 
@@ -84,14 +82,14 @@ class AwsKeyDriver implements KeyDriver
         if ($meta['KeyState'] === self::KEY_STATE_PENDING_DELETION &&
             isset($meta['DeletionDate']) &&
             Carbon::parse($meta['DeletionDate'])->isPast()) {
-            throw new \RuntimeException("master key has been deleted");
+            throw new \RuntimeException('master key has been deleted');
         }
 
         // check if the key has been rotated to a new value
         if ($meta['Origin'] === 'External' &&
             $meta['ExpirationModel'] == 'KEY_MATERIAL_EXPIRES' &&
             Carbon::parse($meta['ValidTo'])->isPast()) {
-            throw new \RuntimeException("master key has been rotated and local key needs to be updated");
+            throw new \RuntimeException('master key has been rotated and local key needs to be updated');
         }
 
         if ($meta['KeyState'] === self::KEY_STATE_DISABLED) {
@@ -106,9 +104,9 @@ class AwsKeyDriver implements KeyDriver
     }
 
     /**
-     * Generate a local data key encrypted with the given AWS KMS key
+     * Generate a local data key encrypted with the given AWS KMS key.
      *
-     * @param int $length
+     * @param int   $length
      * @param array $additionalOptions
      *
      * @throws InvalidArgumentException
@@ -125,13 +123,13 @@ class AwsKeyDriver implements KeyDriver
         $client = new KmsClient([
            'profile' => 'default',
            'version' => 'latest',
-           'region' => self::resolveRegion($additionalOptions),
+           'region'  => self::resolveRegion($additionalOptions),
         ]);
 
         $result = $client->generateDataKeyWithoutPlaintext([
             'EncryptionContext' => $additionalOptions['context'] ?? [],
-            'KeyId' => $additionalOptions['master-key'],
-            'NumberOfBytes' => $length,
+            'KeyId'             => $additionalOptions['master-key'],
+            'NumberOfBytes'     => $length,
         ]);
 
         return $result['CiphertextBlob'];
@@ -146,14 +144,14 @@ class AwsKeyDriver implements KeyDriver
     }
 
     /**
-     * Re-encrypt the key and return it
+     * Re-encrypt the key and return it.
      *
      * @return string
      */
     public function reEncrypt(): string
     {
         $result = $this->awsClient->reEncrypt([
-            'CiphertextBlob' => $this->key,
+            'CiphertextBlob'   => $this->key,
             'DestinationKeyId' => $this->options['master-key'],
         ]);
 
@@ -161,7 +159,7 @@ class AwsKeyDriver implements KeyDriver
     }
 
     /**
-     * Get the decrypted key
+     * Get the decrypted key.
      *
      * @return string
      */
@@ -175,7 +173,7 @@ class AwsKeyDriver implements KeyDriver
     }
 
     /**
-     * Decrypt the key cipher text
+     * Decrypt the key cipher text.
      *
      * @return string
      */
