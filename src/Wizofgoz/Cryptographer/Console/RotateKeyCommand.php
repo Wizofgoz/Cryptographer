@@ -4,7 +4,6 @@ namespace Wizofgoz\Cryptographer\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
-use Wizofgoz\Cryptographer\EncryptionManager;
 use Wizofgoz\Cryptographer\KeyManager;
 
 class RotateKeyCommand extends Command
@@ -55,6 +54,7 @@ class RotateKeyCommand extends Command
 
         if ($this->option('show')) {
             $this->line('<comment>'.$key.'</comment>');
+
             return;
         }
 

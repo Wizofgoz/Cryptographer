@@ -53,12 +53,12 @@ return [
     'keys' => [
 
         'default' => [
-            'driver' => 'local',
+            'driver'     => 'local',
             'value'      => env('APP_KEY'),
         ],
 
         'kms' => [
-            'driver' => 'aws',
+            'driver'     => 'aws',
             'value'      => env('AWS_DATA_KEY'),
             'region'     => 'us-west-2',
             'profile'    => 'default', // credentials to use from ~/.aws/credentials file

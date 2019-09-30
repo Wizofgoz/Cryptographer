@@ -8,7 +8,6 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
 use Wizofgoz\Cryptographer\Contracts\KeyDriver;
-use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
 use Wizofgoz\Cryptographer\KeyDrivers\AwsKeyDriver;
 use Wizofgoz\Cryptographer\KeyDrivers\LocalKeyDriver;
 
@@ -67,6 +66,7 @@ class KeyManager
      * @param $driver
      * @param $length
      * @param array $additionalOptions
+     *
      * @return mixed
      */
     public static function generateKey($driver, $length, array $additionalOptions = [])
@@ -158,7 +158,7 @@ class KeyManager
     /**
      * Create an instance of the local key driver.
      *
-     * @param array     $config
+     * @param array $config
      *
      * @return \Wizofgoz\Cryptographer\KeyDrivers\LocalKeyDriver
      */
@@ -170,7 +170,7 @@ class KeyManager
     /**
      * Create an instance of the AWS key driver.
      *
-     * @param array     $config
+     * @param array $config
      *
      * @return \Wizofgoz\Cryptographer\KeyDrivers\AwsKeyDriver
      */
@@ -255,6 +255,7 @@ class KeyManager
     {
         // if a default isn't set in the config, use the first in the list of drivers
         $keys = array_keys($this->app['config']['cryptographer.keys']);
+
         return $this->app['config']['cryptographer.default-key'] ?? reset($keys);
     }
 

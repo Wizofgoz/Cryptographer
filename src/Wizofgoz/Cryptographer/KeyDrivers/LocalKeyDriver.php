@@ -14,7 +14,7 @@ class LocalKeyDriver implements KeyDriver
     }
 
     /**
-     * @param int $length
+     * @param int   $length
      * @param array $additionalOptions
      *
      * @throws \Exception
@@ -37,7 +37,7 @@ class LocalKeyDriver implements KeyDriver
     }
 
     /**
-     * Re-encrypt the key and return it
+     * Re-encrypt the key and return it.
      *
      * @return string
      */
