@@ -2,8 +2,8 @@
 
 namespace Wizofgoz\Cryptographer\Tests\Integration;
 
-use Orchestra\Testbench\TestCase;
 use InvalidArgumentException;
+use Orchestra\Testbench\TestCase;
 use RuntimeException;
 use Wizofgoz\Cryptographer\Crypt;
 use Wizofgoz\Cryptographer\EncryptionManager;
@@ -26,7 +26,7 @@ class EncryptionTest extends TestCase
             'keys' => [
                 'default' => [
                     'driver' => 'local',
-                    'value' => 'base64:IUHRqAQ99pZ0A1MPjbuv1D6ff3jxv0GIvS2qIW4JNU4=',
+                    'value'  => 'base64:IUHRqAQ99pZ0A1MPjbuv1D6ff3jxv0GIvS2qIW4JNU4=',
                 ],
             ],
         ]);

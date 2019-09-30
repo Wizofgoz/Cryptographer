@@ -337,6 +337,7 @@ class EncryptionManager
     {
         // if a default isn't set in the config, use the first in the list of drivers
         $keys = array_keys($this->app['config']['cryptographer.drivers']);
+
         return $this->app['config']['cryptographer.default-driver'] ?? reset($keys);
     }
 

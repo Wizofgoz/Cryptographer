@@ -40,7 +40,7 @@ class AwsKeyDriverTest extends TestCase
     public function testGenerateKeyWithAlternateKeyDefinition()
     {
         if (!Str::startsWith($this->options['master-key'], 'arn')) {
-            $this->markTestSkipped("key not in ARN format so skipping");
+            $this->markTestSkipped('key not in ARN format so skipping');
         }
 
         $options = $this->options;

@@ -60,6 +60,7 @@ class KeyGenerateCommand extends Command
 
         if ($this->option('show')) {
             $this->line('<comment>'.$key.'</comment>');
+
             return;
         }
 
