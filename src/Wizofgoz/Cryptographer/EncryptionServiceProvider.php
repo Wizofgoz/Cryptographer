@@ -68,6 +68,11 @@ class EncryptionServiceProvider extends ServiceProvider
         });
     }
 
+    public function provides()
+    {
+        return ['encrypter'];
+    }
+
     /**
      * Register the Cryptographer Artisan command.
      *

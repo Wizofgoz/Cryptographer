@@ -59,7 +59,7 @@ class EncryptionManager
      *
      * @throws \InvalidArgumentException
      *
-     * @return mixed
+     * @return Engine
      */
     public function driver($driver = null)
     {
@@ -136,7 +136,7 @@ class EncryptionManager
         $engine = $config['engine'];
         /** @var KeyManager $keyManager */
         $keyManager = $this->app->get('key-manager');
-        $keyDriver = $keyManager->driver($config['key']);
+        $keyDriver = $keyManager->key($config['key']);
 
         // First, we will determine if a custom driver creator exists for the given driver and
         // if it does not we will check for a creator method for the driver. Custom creator
@@ -215,10 +215,11 @@ class EncryptionManager
      * @param string      $engine
      * @param string      $keyDriver
      * @param string|null $cipher
+     * @param array       $additionalOptions
      *
      * @return string
      */
-    public static function generateKey($engine, $keyDriver, $cipher = null)
+    public static function generateKey($engine, $keyDriver, $cipher = null, array $additionalOptions = [])
     {
         if (!isset(static::$engineMap[$engine])) {
             throw new InvalidArgumentException("Key generator not found for [{$engine}] engine.");
@@ -231,7 +232,7 @@ class EncryptionManager
             throw new RuntimeException("Key generator class [{$keyGenerator}] not found for [{$engine}] engine.");
         }
 
-        return KeyManager::generateKey($keyDriver, $keyGenerator::getKeyLength($cipher));
+        return KeyManager::generateKey($keyDriver, $keyGenerator::getKeyLength($cipher), $additionalOptions);
     }
 
     /**
@@ -335,7 +336,8 @@ class EncryptionManager
     public function getDefaultDriver()
     {
         // if a default isn't set in the config, use the first in the list of drivers
-        return $this->app['config']['cryptographer.default-driver'] ?? reset(array_keys($this->app['config']['cryptographer.drivers']));
+        $keys = array_keys($this->app['config']['cryptographer.drivers']);
+        return $this->app['config']['cryptographer.default-driver'] ?? reset($keys);
     }
 
     /**

@@ -4,12 +4,14 @@ namespace Wizofgoz\Cryptographer\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
+use Wizofgoz\Cryptographer\KeyDrivers\LocalKeyDriver;
 
 class OpenSslEngineTest extends TestCase
 {
     public function testEncryption()
     {
-        $e = new OpenSslEngine(str_repeat('a', 16));
+        $k = new LocalKeyDriver(str_repeat('a', 16), []);
+        $e = new OpenSslEngine($k);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -18,7 +20,8 @@ class OpenSslEngineTest extends TestCase
 
     public function testRawStringEncryption()
     {
-        $e = new OpenSslEngine(str_repeat('a', 16));
+        $k = new LocalKeyDriver(str_repeat('a', 16), []);
+        $e = new OpenSslEngine($k);
         $encrypted = $e->encryptString('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -27,37 +30,19 @@ class OpenSslEngineTest extends TestCase
 
     public function testWithCustomCipher()
     {
-        $e = new OpenSslEngine(str_repeat('b', 32), OpenSslEngine::CIPHER_AES_256);
+        $k = new LocalKeyDriver(str_repeat('b', 32), []);
+        $e = new OpenSslEngine($k, OpenSslEngine::CIPHER_AES_256);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new OpenSslEngine(random_bytes(32), OpenSslEngine::CIPHER_AES_256);
+        $k2 = new LocalKeyDriver(random_bytes(32), []);
+        $e = new OpenSslEngine($k2, OpenSslEngine::CIPHER_AES_256);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
         $this->assertEquals('foo', $e->decrypt($encrypted));
-    }
-
-    public function testGenerateKey()
-    {
-        $f = new OpenSslEngine(OpenSslEngine::generateKey());
-
-        $plaintext = 'bar';
-        $ciphertext = $f->encrypt($plaintext);
-
-        $this->assertEquals($plaintext, $f->decrypt($ciphertext));
-    }
-
-    public function testGenerateKeyWithCustomCipher()
-    {
-        $f = new OpenSslEngine(OpenSslEngine::generateKey(OpenSslEngine::CIPHER_AES_256), OpenSslEngine::CIPHER_AES_256);
-
-        $plaintext = 'bar';
-        $ciphertext = $f->encrypt($plaintext);
-
-        $this->assertEquals($plaintext, $f->decrypt($ciphertext));
     }
 
     /**
@@ -66,7 +51,8 @@ class OpenSslEngineTest extends TestCase
      */
     public function testExceptionThrownWhenPayloadIsInvalid()
     {
-        $e = new OpenSslEngine(str_repeat('a', 16));
+        $k = new LocalKeyDriver(str_repeat('a', 16), []);
+        $e = new OpenSslEngine($k);
 
         $payload = $e->encrypt('foo');
 
@@ -81,8 +67,10 @@ class OpenSslEngineTest extends TestCase
      */
     public function testExceptionThrownWithDifferentKey()
     {
-        $a = new OpenSslEngine(str_repeat('a', 16));
-        $b = new OpenSslEngine(str_repeat('b', 16));
+        $k = new LocalKeyDriver(str_repeat('a', 16), []);
+        $a = new OpenSslEngine($k);
+        $k2 = new LocalKeyDriver(str_repeat('b', 16), []);
+        $b = new OpenSslEngine($k2);
 
         $b->decrypt($a->encrypt('baz'));
     }
@@ -93,7 +81,8 @@ class OpenSslEngineTest extends TestCase
      */
     public function testExceptionThrownWhenIvIsTooLong()
     {
-        $e = new OpenSslEngine(str_repeat('a', 16));
+        $k = new LocalKeyDriver(str_repeat('a', 16), []);
+        $e = new OpenSslEngine($k);
 
         $payload = $e->encrypt('foo');
 

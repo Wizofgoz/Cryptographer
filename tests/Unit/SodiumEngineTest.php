@@ -4,6 +4,7 @@ namespace Wizofgoz\Cryptographer\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Wizofgoz\Cryptographer\Engines\SodiumEngine;
+use Wizofgoz\Cryptographer\KeyDrivers\LocalKeyDriver;
 
 class SodiumEngineTest extends TestCase
 {
@@ -16,53 +17,10 @@ class SodiumEngineTest extends TestCase
         }
     }
 
-    public function testGenerateKey()
-    {
-        $f = new SodiumEngine(SodiumEngine::generateKey());
-
-        $plaintext = 'bar';
-        $ciphertext = $f->encrypt($plaintext);
-
-        $this->assertEquals($plaintext, $f->decrypt($ciphertext));
-    }
-
-    public function testGenerateKeyWithChachaCipher()
-    {
-        $f = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_CHACHA), SodiumEngine::CIPHER_CHACHA);
-
-        $plaintext = 'bar';
-        $ciphertext = $f->encrypt($plaintext);
-
-        $this->assertEquals($plaintext, $f->decrypt($ciphertext));
-    }
-
-    public function testGenerateKeyWithAesCipher()
-    {
-        if (!sodium_crypto_aead_aes256gcm_is_available()) {
-            $this->markTestSkipped('AES-256-GCM is not supported for this architecture');
-        }
-
-        $f = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_AES_256), SodiumEngine::CIPHER_AES_256);
-
-        $plaintext = 'bar';
-        $ciphertext = $f->encrypt($plaintext);
-
-        $this->assertEquals($plaintext, $f->decrypt($ciphertext));
-    }
-
-    public function testGenerateKeyWithXChachaIETFCipher()
-    {
-        $f = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_X_CHACHA_IETF), SodiumEngine::CIPHER_X_CHACHA_IETF);
-
-        $plaintext = 'bar';
-        $ciphertext = $f->encrypt($plaintext);
-
-        $this->assertEquals($plaintext, $f->decrypt($ciphertext));
-    }
-
     public function testEncryption()
     {
-        $e = new SodiumEngine(SodiumEngine::generateKey());
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength()), []);
+        $e = new SodiumEngine($k);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -71,7 +29,8 @@ class SodiumEngineTest extends TestCase
 
     public function testRawStringEncryption()
     {
-        $e = new SodiumEngine(SodiumEngine::generateKey());
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength()), []);
+        $e = new SodiumEngine($k);
         $encrypted = $e->encryptString('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -80,13 +39,15 @@ class SodiumEngineTest extends TestCase
 
     public function testWithChachaCipher()
     {
-        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_CHACHA), SodiumEngine::CIPHER_CHACHA);
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength(SodiumEngine::CIPHER_CHACHA)), []);
+        $e = new SodiumEngine($k, SodiumEngine::CIPHER_CHACHA);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_CHACHA), SodiumEngine::CIPHER_CHACHA);
+        $k2 = new LocalKeyDriver(str_repeat('b', SodiumEngine::getKeyLength(SodiumEngine::CIPHER_CHACHA)), []);
+        $e = new SodiumEngine($k2, SodiumEngine::CIPHER_CHACHA);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -99,13 +60,15 @@ class SodiumEngineTest extends TestCase
             $this->markTestSkipped('AES-256-GCM is not supported for this architecture');
         }
 
-        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_AES_256), SodiumEngine::CIPHER_AES_256);
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength(SodiumEngine::CIPHER_AES_256)), []);
+        $e = new SodiumEngine($k, SodiumEngine::CIPHER_AES_256);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_AES_256), SodiumEngine::CIPHER_AES_256);
+        $k2 = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength(SodiumEngine::CIPHER_AES_256)), []);
+        $e = new SodiumEngine($k2, SodiumEngine::CIPHER_AES_256);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -114,13 +77,15 @@ class SodiumEngineTest extends TestCase
 
     public function testWithXChachaIETFCipher()
     {
-        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_X_CHACHA_IETF), SodiumEngine::CIPHER_X_CHACHA_IETF);
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength(SodiumEngine::CIPHER_X_CHACHA_IETF)), []);
+        $e = new SodiumEngine($k, SodiumEngine::CIPHER_X_CHACHA_IETF);
         $encrypted = $e->encrypt('bar');
 
         $this->assertNotEquals('bar', $encrypted);
         $this->assertEquals('bar', $e->decrypt($encrypted));
 
-        $e = new SodiumEngine(SodiumEngine::generateKey(SodiumEngine::CIPHER_X_CHACHA_IETF), SodiumEngine::CIPHER_X_CHACHA_IETF);
+        $k2 = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength(SodiumEngine::CIPHER_X_CHACHA_IETF)), []);
+        $e = new SodiumEngine($k2, SodiumEngine::CIPHER_X_CHACHA_IETF);
         $encrypted = $e->encrypt('foo');
 
         $this->assertNotEquals('foo', $encrypted);
@@ -133,7 +98,8 @@ class SodiumEngineTest extends TestCase
      */
     public function testExceptionThrownWhenPayloadIsInvalid()
     {
-        $e = new SodiumEngine(SodiumEngine::generateKey());
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength()), []);
+        $e = new SodiumEngine($k);
 
         $payload = $e->encrypt('foo');
 
@@ -148,8 +114,10 @@ class SodiumEngineTest extends TestCase
      */
     public function testExceptionThrownWithDifferentKey()
     {
-        $a = new SodiumEngine(SodiumEngine::generateKey());
-        $b = new SodiumEngine(SodiumEngine::generateKey());
+        $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength()), []);
+        $a = new SodiumEngine($k);
+        $k2 = new LocalKeyDriver(str_repeat('b', SodiumEngine::getKeyLength()), []);
+        $b = new SodiumEngine($k2);
 
         $b->decrypt($a->encrypt('baz'));
     }

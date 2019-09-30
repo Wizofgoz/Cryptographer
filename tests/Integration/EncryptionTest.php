@@ -3,7 +3,9 @@
 namespace Wizofgoz\Cryptographer\Tests\Integration;
 
 use Orchestra\Testbench\TestCase;
+use InvalidArgumentException;
 use RuntimeException;
+use Wizofgoz\Cryptographer\Crypt;
 use Wizofgoz\Cryptographer\EncryptionManager;
 use Wizofgoz\Cryptographer\EncryptionServiceProvider;
 use Wizofgoz\Cryptographer\Engines\OpenSslEngine;
@@ -18,7 +20,13 @@ class EncryptionTest extends TestCase
                 'default' => [
                     'engine' => 'openssl',
                     'cipher' => OpenSslEngine::CIPHER_AES_256,
-                    'key'    => 'base64:IUHRqAQ99pZ0A1MPjbuv1D6ff3jxv0GIvS2qIW4JNU4=',
+                    'key'    => 'default',
+                ],
+            ],
+            'keys' => [
+                'default' => [
+                    'driver' => 'local',
+                    'value' => 'base64:IUHRqAQ99pZ0A1MPjbuv1D6ff3jxv0GIvS2qIW4JNU4=',
                 ],
             ],
         ]);
@@ -38,10 +46,11 @@ class EncryptionTest extends TestCase
     {
         $key = EncryptionManager::generateKey(
             $this->app['config']->get('cryptographer.drivers.default.engine'),
+            $this->app['config']->get('cryptographer.keys.default.driver'),
             $this->app['config']->get('cryptographer.drivers.default.cipher')
         );
 
-        $this->app['config']->set('cryptographer.drivers.default.key', $key);
+        $this->app['config']->set('cryptographer.keys.default.value', $key);
 
         $e = $this->app->make('encrypter');
 
@@ -55,7 +64,7 @@ class EncryptionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $this->app['config']->set('cryptographer.drivers.default.key', null);
+        $this->app['config']->set('cryptographer.keys.default.value', null);
 
         $e = $this->app->make('encrypter');
 
@@ -66,7 +75,7 @@ class EncryptionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $this->app['config']->set('cryptographer.drivers.default.key', str_repeat('z', 32));
+        $this->app['config']->set('cryptographer.keys.default.value', str_repeat('z', 32));
         $this->app['config']->set('cryptographer.drivers.default.cipher', OpenSslEngine::CIPHER_AES_128);
 
         $e = $this->app->make('encrypter');
@@ -78,7 +87,7 @@ class EncryptionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $this->app['config']->set('cryptographer.drivers.default.key', str_repeat('z', 5));
+        $this->app['config']->set('cryptographer.keys.default.value', str_repeat('z', 5));
 
         $e = $this->app->make('encrypter');
 
@@ -89,7 +98,7 @@ class EncryptionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $this->app['config']->set('cryptographer.drivers.default.key', str_repeat('z', 16));
+        $this->app['config']->set('cryptographer.keys.default.value', str_repeat('z', 16));
 
         $e = $this->app->make('encrypter');
 
@@ -98,13 +107,22 @@ class EncryptionTest extends TestCase
 
     public function testWithUnsupportedCipher()
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->app['config']->set('cryptographer.drivers.default.key', str_repeat('z', 16));
+        $this->app['config']->set('cryptographer.keys.default.value', str_repeat('z', 16));
         $this->app['config']->set('cryptographer.drivers.default.cipher', 'AES-256-CFB8');
 
         $e = $this->app->make('encrypter');
 
         $e->encrypt('bar');
+    }
+
+    public function testFacade()
+    {
+        $plaintext = 'asdfghjkl';
+        $ciphertext = Crypt::encrypt($plaintext);
+
+        $this->assertNotEquals($plaintext, $ciphertext);
+        $this->assertEquals($plaintext, Crypt::decrypt($ciphertext));
     }
 }

@@ -51,19 +51,20 @@ return [
      */
 
     'keys' => [
+
         'default' => [
-            'management' => 'local',
+            'driver' => 'local',
             'value'      => env('APP_KEY'),
         ],
 
         'kms' => [
-            'management' => 'aws',
-            'value'      => 'encrypted_data_key',
-            'region'     => 'aws_region',
-            'rotation'   => true,
+            'driver' => 'aws',
+            'value'      => env('AWS_DATA_KEY'),
+            'region'     => 'us-west-2',
+            'profile'    => 'default', // credentials to use from ~/.aws/credentials file
             'master-key' => 'key_id_for_making_data_key',
             'context'    => [], // optional key/values for authenticating
-
         ],
+
     ],
 ];

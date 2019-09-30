@@ -14,13 +14,14 @@ class LocalKeyDriver implements KeyDriver
     }
 
     /**
-     * @param $length
+     * @param int $length
+     * @param array $additionalOptions
      *
      * @throws \Exception
      *
      * @return string
      */
-    public static function generateKey($length)
+    public static function generateKey($length, array $additionalOptions = [])
     {
         return random_bytes($length);
     }
@@ -28,6 +29,22 @@ class LocalKeyDriver implements KeyDriver
     public function getKey()
     {
         return $this->key;
+    }
+
+    public function isKeyRotatable(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Re-encrypt the key and return it
+     *
+     * @return string
+     */
+    public function reEncrypt(): string
+    {
+        // just return the key since it's not encrypted
+        return $this->getKey();
     }
 
     /**
