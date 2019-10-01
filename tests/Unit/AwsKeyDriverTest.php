@@ -20,7 +20,7 @@ class AwsKeyDriverTest extends TestCase
     protected function setUp(): void
     {
         if (($key = getenv('AWS_MASTER_KEY')) === false) {
-            $this->markTestSkipped();
+            $this->markTestSkipped('no AWS key specified for tests so skipping');
         }
 
         $this->options['master-key'] = getenv('AWS_MASTER_KEY');

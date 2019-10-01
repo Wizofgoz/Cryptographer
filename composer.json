@@ -26,7 +26,8 @@
     "orchestra/testbench": "^3.1",
     "mockery/mockery": "^1.0",
     "php-coveralls/php-coveralls": "^2.0",
-    "aws/aws-sdk-php": "^3.112"
+    "aws/aws-sdk-php": "^3.112",
+    "guzzlehttp/guzzle": "^6.3"
   },
   "autoload": {
     "files": [

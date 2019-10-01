@@ -51,7 +51,7 @@ class OpenSslEngine extends Engine
         );
 
         if ($value === false) {
-            throw new EncryptException('Could not encrypt the data.');
+            throw new EncryptException('Could not encrypt the data');
         }
 
         // Once we get the encrypted value we'll go ahead and base64_encode the input
@@ -62,7 +62,7 @@ class OpenSslEngine extends Engine
         $json = json_encode(compact('iv', 'value', 'mac'));
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new EncryptException('Could not encrypt the data.');
+            throw new EncryptException('Could not encrypt the data');
         }
 
         return base64_encode($json);
@@ -108,7 +108,7 @@ class OpenSslEngine extends Engine
         );
 
         if ($decrypted === false) {
-            throw new DecryptException('Could not decrypt the data.');
+            throw new DecryptException('Could not decrypt the data');
         }
 
         return $unserialize ? unserialize($decrypted) : $decrypted;
@@ -160,11 +160,11 @@ class OpenSslEngine extends Engine
         // assume it is invalid and bail out of the routine since we will not be able
         // to decrypt the given value. We'll also check the MAC for this encryption.
         if (!$this->validPayload($payload)) {
-            throw new DecryptException('The payload is invalid.');
+            throw new DecryptException('The payload is invalid');
         }
 
         if (!$this->validMac($payload)) {
-            throw new DecryptException('The MAC is invalid.');
+            throw new DecryptException('The MAC is invalid');
         }
 
         return $payload;

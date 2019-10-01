@@ -56,7 +56,7 @@ class SodiumEngine extends Engine
         $value = $this->doEncrypt($value);
 
         if ($value === false) {
-            throw new EncryptException('Could not encrypt the data.');
+            throw new EncryptException('Could not encrypt the data');
         }
 
         return sodium_bin2hex($value);
@@ -152,7 +152,7 @@ class SodiumEngine extends Engine
         $decrypted = $this->doDecrypt($decoded);
 
         if ($decrypted === false) {
-            throw new DecryptException('Could not decrypt the data.');
+            throw new DecryptException('Could not decrypt the data');
         }
 
         return $unserialize ? unserialize($decrypted) : $decrypted;

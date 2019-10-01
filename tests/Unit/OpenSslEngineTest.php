@@ -45,12 +45,11 @@ class OpenSslEngineTest extends TestCase
         $this->assertEquals('foo', $e->decrypt($encrypted));
     }
 
-    /**
-     * @expectedException \Illuminate\Contracts\Encryption\DecryptException
-     * @expectedExceptionMessage The payload is invalid.
-     */
     public function testExceptionThrownWhenPayloadIsInvalid()
     {
+        $this->expectException(\Illuminate\Contracts\Encryption\DecryptException::class);
+        $this->expectExceptionMessage('The payload is invalid');
+
         $k = new LocalKeyDriver(str_repeat('a', 16), []);
         $e = new OpenSslEngine($k);
 
@@ -61,12 +60,11 @@ class OpenSslEngineTest extends TestCase
         $e->decrypt($payload);
     }
 
-    /**
-     * @expectedException \Illuminate\Contracts\Encryption\DecryptException
-     * @expectedExceptionMessage The MAC is invalid.
-     */
     public function testExceptionThrownWithDifferentKey()
     {
+        $this->expectException(\Illuminate\Contracts\Encryption\DecryptException::class);
+        $this->expectExceptionMessage('The MAC is invalid');
+
         $k = new LocalKeyDriver(str_repeat('a', 16), []);
         $a = new OpenSslEngine($k);
         $k2 = new LocalKeyDriver(str_repeat('b', 16), []);
@@ -75,12 +73,11 @@ class OpenSslEngineTest extends TestCase
         $b->decrypt($a->encrypt('baz'));
     }
 
-    /**
-     * @expectedException \Illuminate\Contracts\Encryption\DecryptException
-     * @expectedExceptionMessage The payload is invalid.
-     */
     public function testExceptionThrownWhenIvIsTooLong()
     {
+        $this->expectException(\Illuminate\Contracts\Encryption\DecryptException::class);
+        $this->expectExceptionMessage('The payload is invalid');
+
         $k = new LocalKeyDriver(str_repeat('a', 16), []);
         $e = new OpenSslEngine($k);
 

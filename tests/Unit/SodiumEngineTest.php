@@ -92,12 +92,11 @@ class SodiumEngineTest extends TestCase
         $this->assertEquals('foo', $e->decrypt($encrypted));
     }
 
-    /**
-     * @expectedException \Illuminate\Contracts\Encryption\DecryptException
-     * @expectedExceptionMessage Could not decrypt the data.
-     */
     public function testExceptionThrownWhenPayloadIsInvalid()
     {
+        $this->expectException(\Illuminate\Contracts\Encryption\DecryptException::class);
+        $this->expectExceptionMessage('Could not decrypt the data');
+
         $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength()), []);
         $e = new SodiumEngine($k);
 
@@ -108,12 +107,11 @@ class SodiumEngineTest extends TestCase
         $e->decrypt($payload);
     }
 
-    /**
-     * @expectedException \Illuminate\Contracts\Encryption\DecryptException
-     * @expectedExceptionMessage Could not decrypt the data.
-     */
     public function testExceptionThrownWithDifferentKey()
     {
+        $this->expectException(\Illuminate\Contracts\Encryption\DecryptException::class);
+        $this->expectExceptionMessage('Could not decrypt the data');
+
         $k = new LocalKeyDriver(str_repeat('a', SodiumEngine::getKeyLength()), []);
         $a = new SodiumEngine($k);
         $k2 = new LocalKeyDriver(str_repeat('b', SodiumEngine::getKeyLength()), []);
