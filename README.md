@@ -22,23 +22,89 @@ After installing, publish the configuration:
 ## Configuration
 After publishing the configuration file, it will be located at `config/cryptographer.php` This file allows you to define the encryption drivers available to your application.
 
-### Default Driver
-This option allows you to define the default driver to use when using the encryption service. If no default driver is set, the first entry in the drivers array will be used.
+### Defaults
+These options allow you to define the default encryption driver and key to use when using the encryption service. If no default driver is set, the first entry in the drivers array will be used.
 
-`'default' => 'default'`
+```php
+'default-driver' => 'default',
+'default-key'    => 'default',
+```
 
 ### Available Drivers
-This option allows for defining the encryption drivers available to your application. Each entry in the list MUST contain an engine, cipher, and key for proper use.
+This array allows for defining the encryption drivers available to your application. Each entry in the list MUST contain an engine, cipher, and key name for proper use.
 
 ```php
 'drivers' => [
     'default' => [
         'engine' => 'openssl',
         'cipher' => OpenSslEngine::CIPHER_AES_128,
-        'key'    => env('APP_KEY'),
+        'key'    => 'default',
     ],
 ],
 ```
+
+### Keys
+This array allows for defining multiple keys for use with your encryption drivers. Each key must have a unique name.
+
+#### Local Driver
+The simplest key implementation is one that is managed locally. With this driver, the key is visible locally in plaintext and is loaded directly into the encryption driver being used.
+
+```php
+'default' => [
+    'driver' => 'local',
+    'value' => env('APP_KEY'),
+],
+```
+
+#### AWS Driver
+When it is unacceptable for the key to be stored in plaintext, the AWS driver is able to use a local key that has been encrypted with an AWS KMS consumer key. 
+
+This allows you to rotate the encryption of the key and not have to re-encrypt all the data the key was used to encrypt.
+
+```php
+'kms' => [
+    'driver'     => 'aws',
+    'value'      => env('AWS_DATA_KEY'), // encrypted value of the local data key
+    'region'     => 'us-west-2',
+    'profile'    => 'default', // credentials to use from ~/.aws/credentials file
+    'master-key' => 'key_id_for_making_data_key', // ARN or key ID of master key to use
+    'context'    => [], // optional key/values for authenticating key material
+],
+``` 
+
+## Usage
+This package integrates with Laravel's encryption system and either the built-in `encrypt()` and `decrypt()` helpers or the `Crypt` facade may be used when you want to utilize your default driver.
+
+In order to use additional drivers, either the `Crypt` facade must be used as shown below:
+
+```php
+use Illuminate\Support\Facades\Crypt;
+
+$encrypted = Crypt::driver('something')->encrypt('Hello world.');
+```
+
+Or the `ncrypt` and `dcrypt` helper functions must be used:
+
+```php
+$encrypted = ncrypt('some value', 'driver_name');
+
+$plaintext = dcrypt($encrypted, 'driver_name');
+```
+
+### Key Generation
+Encryption keys can be generated using the command `php artisan crypt:key:generate` and there are the following options available:
+
+- `--driver` the name of the driver from your configuration to use.
+- `--engine` an override of the engine to use when generating a key.
+- `--cipher` an override of the cipher to use when generating a key.
+- `--key-driver` an override of the key driver to use when generating a key.
+- `--aws-master-key` an override of the AWS CMK to use for encrypting a local data key (Only used for AWS key driver).
+- `--aws-region` an override of the AWS region to use for making calls to the AWS API (Only used for AWS key driver).
+- `--aws-context` an override of any custom context to use for encrypting the local data key (Only used for AWS key driver).
+- `--environment` what environment variable to set in your .env file. Defaults to `APP_KEY`.
+- `--show` to display the key instead of applying it to configuration and environment.
+- `--force` force the operation to run when in production.
+
 ## Available Engines
 ### OpenSSL
 The `openssl` engine is drop-in replacement for Laravel's encryption system that will work with existing keys assuming the cipher is set correctly.
@@ -58,37 +124,12 @@ The `sodium` engine depends on the [Sodium](http://php.net/manual/en/book.sodium
 - `SodiumEngine::CIPHER_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF
 - `SodiumEngine::CIPHER_X_CHACHA_IETF`: XCHACHA-20-POLY-1305-IETF - default
 
-## Usage
-This package integrates with Laravel's encryption system and either the built-in `encrypt()` and `decrypt()` helpers or the `Crypt` facade may be used when you want to utilize your default driver.
-
-In order to use additional drivers, the `Crypt` facade must be used:
-
-```php
-use Illuminate\Support\Facades\Crypt;
-
-$encrypted = Crypt::driver('something')->encrypt('Hello world.');
-```
-
-### Key Generation
-Encryption keys can be generated using the command `php artisan crypt:key:generate` and there are the following options available:
-
-- `--driver` the name of the driver from your configuration to use.
-- `--engine` an override of the engine to use when generating a key.
-- `--cipher` an override of the cipher to use when generating a key.
-- `--environment` what environment variable to set in your .env file. Defaults to `APP_KEY`.
-- `--show` to display the key instead of applying it to configuration and environment.
-- `--force` force the operation to run when in production.
-
 ## Extensions
-Custom engines can be added by simply extending `EncryptionManager` and registering a key generator in your service provider's `register` function:
+Custom encryption engines are expected to implement the `Wizofgoz\Cryptographer\Contracts\Engine` contract and can be added by simply extending `EncryptionManager`:
 
 ```php
 public function register()
 {
-    EncryptionManager::registerKeyGenerator('engine_name', function () {
-        return CustomEngine::class;
-    });
-
     $this->app->resolving('encrypter', function ($encrypter) {
         $encrypter->extend('engine_name', function ($config) {
             return new CustomEngine($config);
@@ -97,4 +138,15 @@ public function register()
 }
 ```
 
-Custom engines are expected to implement the `Wizofgoz\Cryptographer\Contracts\Engine` contract.
+Custom key drivers are expected to implement the `Wizofgoz\Cryptographer\Contracts\KeyDriver` contract and can be added in a very similar manner by extending the `KeyManager`:
+
+```php
+public function register()
+{
+    $this->app->resolving('key-manager', function ($km) {
+        $km->extend('driver_name', function ($config) {
+            return new CustomDriver($config);
+        });
+    });
+}
+```

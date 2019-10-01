@@ -7,6 +7,8 @@ use Illuminate\Contracts\Encryption\EncryptException;
 
 class SodiumEngine extends Engine
 {
+    const ENGINE_NAME = 'sodium';
+
     const CIPHER_AES_256 = 'AES-256-GCM';
     const CIPHER_CHACHA = 'CHACHA-20-POLY-1305';
     const CIPHER_CHACHA_IETF = 'CHACHA-20-POLY-1305-IETF';
@@ -56,7 +58,7 @@ class SodiumEngine extends Engine
         $value = $this->doEncrypt($value);
 
         if ($value === false) {
-            throw new EncryptException('Could not encrypt the data.');
+            throw new EncryptException('Could not encrypt the data');
         }
 
         return sodium_bin2hex($value);
@@ -152,7 +154,7 @@ class SodiumEngine extends Engine
         $decrypted = $this->doDecrypt($decoded);
 
         if ($decrypted === false) {
-            throw new DecryptException('Could not decrypt the data.');
+            throw new DecryptException('Could not decrypt the data');
         }
 
         return $unserialize ? unserialize($decrypted) : $decrypted;

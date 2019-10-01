@@ -24,7 +24,13 @@ cache:
 
 before_install:
   - phpenv config-rm xdebug.ini || true
+  - echo "extension = sodium.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - travis_retry composer self-update
+  - mkdir -p ~/.aws
+  - touch ~/.aws/credentials
+  - echo '[default]' >> ~/.aws/credentials
+  - echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
+  - echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
 
 install:
   - if [[ $setup = 'stable' ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-stable --no-suggest; fi

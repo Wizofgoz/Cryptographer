@@ -7,6 +7,8 @@ use Illuminate\Contracts\Encryption\EncryptException;
 
 class OpenSslEngine extends Engine
 {
+    const ENGINE_NAME = 'openssl';
+
     const CIPHER_AES_128 = 'AES-128-CBC';
     const CIPHER_AES_256 = 'AES-256-CBC';
 
@@ -47,11 +49,11 @@ class OpenSslEngine extends Engine
         // value can be verified later as not having been changed by the users.
         $value = \openssl_encrypt(
             $serialize ? serialize($value) : $value,
-            $this->cipher, $this->key, 0, $iv
+            $this->cipher, $this->getKey(), 0, $iv
         );
 
         if ($value === false) {
-            throw new EncryptException('Could not encrypt the data.');
+            throw new EncryptException('Could not encrypt the data');
         }
 
         // Once we get the encrypted value we'll go ahead and base64_encode the input
@@ -62,7 +64,7 @@ class OpenSslEngine extends Engine
         $json = json_encode(compact('iv', 'value', 'mac'));
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new EncryptException('Could not encrypt the data.');
+            throw new EncryptException('Could not encrypt the data');
         }
 
         return base64_encode($json);
@@ -104,11 +106,11 @@ class OpenSslEngine extends Engine
         // we will then unserialize it and return it out to the caller. If we are
         // unable to decrypt this value we will throw out an exception message.
         $decrypted = \openssl_decrypt(
-            $payload['value'], $this->cipher, $this->key, 0, $iv
+            $payload['value'], $this->cipher, $this->getKey(), 0, $iv
         );
 
         if ($decrypted === false) {
-            throw new DecryptException('Could not decrypt the data.');
+            throw new DecryptException('Could not decrypt the data');
         }
 
         return $unserialize ? unserialize($decrypted) : $decrypted;
@@ -139,7 +141,7 @@ class OpenSslEngine extends Engine
      */
     protected function hash($iv, $value)
     {
-        return hash_hmac('sha256', $iv.$value, $this->key);
+        return hash_hmac('sha256', $iv.$value, $this->getKey());
     }
 
     /**
@@ -160,11 +162,11 @@ class OpenSslEngine extends Engine
         // assume it is invalid and bail out of the routine since we will not be able
         // to decrypt the given value. We'll also check the MAC for this encryption.
         if (!$this->validPayload($payload)) {
-            throw new DecryptException('The payload is invalid.');
+            throw new DecryptException('The payload is invalid');
         }
 
         if (!$this->validMac($payload)) {
-            throw new DecryptException('The MAC is invalid.');
+            throw new DecryptException('The MAC is invalid');
         }
 
         return $payload;

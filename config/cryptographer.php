@@ -6,13 +6,26 @@ return [
      | Default Encryption Driver
      |--------------------------------------------------------------------------
      |
-     | This is name of the encryption driver that will be used by default so
+     | This is the name of the encryption driver that will be used by default so
      | expect it to be used for encrypting cookies and whatnot. If this is not
      | set, the first entry in the list of drivers will be used.
      |
      */
 
-    'default' => 'default',
+    'default-driver' => 'default',
+
+    /*
+     |--------------------------------------------------------------------------
+     | Default Key
+     |--------------------------------------------------------------------------
+     |
+     | This is the name of the key that will be used by default if no key is defined
+     | for the encryption driver being used. If this is not set, the first entry in
+     | the list of keys will be used.
+     |
+     */
+
+    'default-key' => 'default',
 
     /*
     |--------------------------------------------------------------------------
@@ -29,9 +42,39 @@ return [
     'drivers' => [
 
         'default' => [
-            'engine' => 'openssl',
+            'engine' => \Wizofgoz\Cryptographer\Engines\OpenSslEngine::ENGINE_NAME,
             'cipher' => \Wizofgoz\Cryptographer\Engines\OpenSslEngine::CIPHER_AES_128,
-            'key'    => env('APP_KEY'),
+            'key'    => 'default',
+        ],
+
+    ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Encryption Keys
+     |--------------------------------------------------------------------------
+     |
+     | This is a list of the encryption keys available to your application. Each
+     | must have a unique name and include a management and value option. The management
+     | option defines what driver to use when managing a key, and the value option
+     | defines the current value of the key.
+     |
+     */
+
+    'keys' => [
+
+        'default' => [
+            'driver'     => 'local',
+            'value'      => env('APP_KEY'),
+        ],
+
+        'kms' => [
+            'driver'     => 'aws',
+            'value'      => env('AWS_DATA_KEY'),
+            'region'     => 'us-west-2',
+            'profile'    => 'default', // credentials to use from ~/.aws/credentials file
+            'master-key' => 'key_id_for_making_data_key',
+            'context'    => [], // optional key/values for authenticating
         ],
 
     ],

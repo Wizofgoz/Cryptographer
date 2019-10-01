@@ -54,11 +54,11 @@ interface Engine
     public function getKey();
 
     /**
-     * Generate a new key for the chosen cipher.
+     * Get the required length of key for the given cipher.
      *
      * @param string $cipher
      *
      * @return mixed
      */
-    public static function generateKey($cipher);
+    public static function getKeyLength($cipher);
 }
