@@ -14,6 +14,17 @@ return [
 
     'default-driver' => 'default',
 
+    /*
+     |--------------------------------------------------------------------------
+     | Default Key
+     |--------------------------------------------------------------------------
+     |
+     | This is the name of the key that will be used by default if no key is defined
+     | for the encryption driver being used. If this is not set, the first entry in
+     | the list of keys will be used.
+     |
+     */
+
     'default-key' => 'default',
 
     /*
@@ -31,7 +42,7 @@ return [
     'drivers' => [
 
         'default' => [
-            'engine' => 'openssl',
+            'engine' => \Wizofgoz\Cryptographer\Engines\OpenSslEngine::ENGINE_NAME,
             'cipher' => \Wizofgoz\Cryptographer\Engines\OpenSslEngine::CIPHER_AES_128,
             'key'    => 'default',
         ],

@@ -7,6 +7,8 @@ use Illuminate\Contracts\Encryption\EncryptException;
 
 class SodiumEngine extends Engine
 {
+    const ENGINE_NAME = 'sodium';
+
     const CIPHER_AES_256 = 'AES-256-GCM';
     const CIPHER_CHACHA = 'CHACHA-20-POLY-1305';
     const CIPHER_CHACHA_IETF = 'CHACHA-20-POLY-1305-IETF';

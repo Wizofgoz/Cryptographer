@@ -8,6 +8,8 @@ use Wizofgoz\Cryptographer\Contracts\KeyDriver;
 
 abstract class Engine implements EngineContract
 {
+    const ENGINE_NAME = null;
+
     const KEY_LENGTHS = [];
 
     const DEFAULT_CIPHER = null;

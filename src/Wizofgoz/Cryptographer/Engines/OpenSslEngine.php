@@ -7,6 +7,8 @@ use Illuminate\Contracts\Encryption\EncryptException;
 
 class OpenSslEngine extends Engine
 {
+    const ENGINE_NAME = 'openssl';
+
     const CIPHER_AES_128 = 'AES-128-CBC';
     const CIPHER_AES_256 = 'AES-256-CBC';
 

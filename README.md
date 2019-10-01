@@ -22,41 +22,55 @@ After installing, publish the configuration:
 ## Configuration
 After publishing the configuration file, it will be located at `config/cryptographer.php` This file allows you to define the encryption drivers available to your application.
 
-### Default Driver
-This option allows you to define the default driver to use when using the encryption service. If no default driver is set, the first entry in the drivers array will be used.
+### Defaults
+These options allow you to define the default encryption driver and key to use when using the encryption service. If no default driver is set, the first entry in the drivers array will be used.
 
-`'default' => 'default'`
+```php
+'default-driver' => 'default',
+'default-key'    => 'default',
+```
 
 ### Available Drivers
-This option allows for defining the encryption drivers available to your application. Each entry in the list MUST contain an engine, cipher, and key for proper use.
+This array allows for defining the encryption drivers available to your application. Each entry in the list MUST contain an engine, cipher, and key name for proper use.
 
 ```php
 'drivers' => [
     'default' => [
         'engine' => 'openssl',
         'cipher' => OpenSslEngine::CIPHER_AES_128,
-        'key'    => env('APP_KEY'),
+        'key'    => 'default',
     ],
 ],
 ```
-## Available Engines
-### OpenSSL
-The `openssl` engine is drop-in replacement for Laravel's encryption system that will work with existing keys assuming the cipher is set correctly.
 
-#### Supported Ciphers
+### Keys
+This array allows for defining multiple keys for use with your encryption drivers. Each key must have a unique name.
 
-- `OpenSslEngine::CIPHER_AES_128`: AES-128-CBC - default
-- `OpenSslEngine::CIPHER_AES_256`: AES-256-CBC
+#### Local Driver
+The simplest key implementation is one that is managed locally. With this driver, the key is visible locally in plaintext and is loaded directly into the encryption driver being used.
 
-### Sodium
-The `sodium` engine depends on the [Sodium](http://php.net/manual/en/book.sodium.php) PHP extension and will not be available if it is missing. In PHP 7.2+, the Sodium extension is part of the core and should always be available.
+```php
+'default' => [
+    'driver' => 'local',
+    'value' => env('APP_KEY'),
+],
+```
 
-#### Supported Ciphers
+#### AWS Driver
+When it is unacceptable for the key to be stored in plaintext, the AWS driver is able to use a local key that has been encrypted with an AWS KMS consumer key. 
 
-- `SodiumEngine::CIPHER_AES_256`: AES-256-GCM - requires hardware support
-- `SodiumEngine::CIPHER_CHACHA`: CHACHA-20-POLY-1305
-- `SodiumEngine::CIPHER_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF
-- `SodiumEngine::CIPHER_X_CHACHA_IETF`: XCHACHA-20-POLY-1305-IETF - default
+This allows you to rotate the encryption of the key and not have to re-encrypt all the data the key was used to encrypt.
+
+```php
+'kms' => [
+    'driver'     => 'aws',
+    'value'      => env('AWS_DATA_KEY'), // encrypted value of the local data key
+    'region'     => 'us-west-2',
+    'profile'    => 'default', // credentials to use from ~/.aws/credentials file
+    'master-key' => 'key_id_for_making_data_key', // ARN or key ID of master key to use
+    'context'    => [], // optional key/values for authenticating key material
+],
+``` 
 
 ## Usage
 This package integrates with Laravel's encryption system and either the built-in `encrypt()` and `decrypt()` helpers or the `Crypt` facade may be used when you want to utilize your default driver.
@@ -90,6 +104,25 @@ Encryption keys can be generated using the command `php artisan crypt:key:genera
 - `--environment` what environment variable to set in your .env file. Defaults to `APP_KEY`.
 - `--show` to display the key instead of applying it to configuration and environment.
 - `--force` force the operation to run when in production.
+
+## Available Engines
+### OpenSSL
+The `openssl` engine is drop-in replacement for Laravel's encryption system that will work with existing keys assuming the cipher is set correctly.
+
+#### Supported Ciphers
+
+- `OpenSslEngine::CIPHER_AES_128`: AES-128-CBC - default
+- `OpenSslEngine::CIPHER_AES_256`: AES-256-CBC
+
+### Sodium
+The `sodium` engine depends on the [Sodium](http://php.net/manual/en/book.sodium.php) PHP extension and will not be available if it is missing. In PHP 7.2+, the Sodium extension is part of the core and should always be available.
+
+#### Supported Ciphers
+
+- `SodiumEngine::CIPHER_AES_256`: AES-256-GCM - requires hardware support
+- `SodiumEngine::CIPHER_CHACHA`: CHACHA-20-POLY-1305
+- `SodiumEngine::CIPHER_CHACHA_IETF`: CHACHA-20-POLY-1305-IETF
+- `SodiumEngine::CIPHER_X_CHACHA_IETF`: XCHACHA-20-POLY-1305-IETF - default
 
 ## Extensions
 Custom encryption engines are expected to implement the `Wizofgoz\Cryptographer\Contracts\Engine` contract and can be added by simply extending `EncryptionManager`:
