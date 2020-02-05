@@ -121,9 +121,9 @@ class AwsKeyDriver implements KeyDriver
         }
 
         $client = new KmsClient([
-           'profile' => 'default',
-           'version' => 'latest',
-           'region'  => self::resolveRegion($additionalOptions),
+            'profile' => 'default',
+            'version' => 'latest',
+            'region'  => self::resolveRegion($additionalOptions),
         ]);
 
         $result = $client->generateDataKeyWithoutPlaintext([
