@@ -49,7 +49,10 @@ class OpenSslEngine extends Engine
         // value can be verified later as not having been changed by the users.
         $value = \openssl_encrypt(
             $serialize ? serialize($value) : $value,
-            $this->cipher, $this->getKey(), 0, $iv
+            $this->cipher,
+            $this->getKey(),
+            0,
+            $iv
         );
 
         if ($value === false) {
@@ -106,7 +109,11 @@ class OpenSslEngine extends Engine
         // we will then unserialize it and return it out to the caller. If we are
         // unable to decrypt this value we will throw out an exception message.
         $decrypted = \openssl_decrypt(
-            $payload['value'], $this->cipher, $this->getKey(), 0, $iv
+            $payload['value'],
+            $this->cipher,
+            $this->getKey(),
+            0,
+            $iv
         );
 
         if ($decrypted === false) {
@@ -199,7 +206,8 @@ class OpenSslEngine extends Engine
         $calculated = $this->calculateMac($payload, $bytes = random_bytes(16));
 
         return hash_equals(
-            hash_hmac('sha256', $payload['mac'], $bytes, true), $calculated
+            hash_hmac('sha256', $payload['mac'], $bytes, true),
+            $calculated
         );
     }
 
@@ -214,7 +222,10 @@ class OpenSslEngine extends Engine
     protected function calculateMac($payload, $bytes)
     {
         return hash_hmac(
-            'sha256', $this->hash($payload['iv'], $payload['value']), $bytes, true
+            'sha256',
+            $this->hash($payload['iv'], $payload['value']),
+            $bytes,
+            true
         );
     }
 }
